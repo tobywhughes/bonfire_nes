@@ -9,8 +9,8 @@ all: $(BUILD_DIR)/$(EXECUTABLE_NAME)
 $(BUILD_DIR)/$(EXECUTABLE_NAME): $(BUILD_DIR)/main.o
 	clang++ $(BUILD_DIR)/main.o -o $(BUILD_DIR)/$(EXECUTABLE_NAME)
 
-$(BUILD_DIR)/main.o: main.cpp
-	clang++ -c main.cpp -o $(BUILD_DIR)/main.o
+$(BUILD_DIR)/main.o: ${SRC_DIR}/main.cpp
+	clang++ -c ${SRC_DIR}/main.cpp -o $(BUILD_DIR)/main.o
 
 
 
