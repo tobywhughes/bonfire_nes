@@ -1,26 +1,29 @@
-BUILD_DIR=build
-SRC_DIR=src
+BUILD_DIR := build
+SRC_DIR := src
 
-EXECUTABLE_NAME=bonfire_nes
+SRCS := $(shell find $(SRC_DIR) -name '*.cpp')
+OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
+
+INC_DIRS := $(shell find $(SRC_DIR) -type d)
+INC_FLAGS := $(addprefix -I,$(INC_DIR))
+
+EXECUTABLE_NAME := bonfire_nes
 
 .PHONY: all
 all: $(BUILD_DIR)/$(EXECUTABLE_NAME)
 
-$(BUILD_DIR)/$(EXECUTABLE_NAME): $(BUILD_DIR)/main.o
-	clang++ $(BUILD_DIR)/main.o -o $(BUILD_DIR)/$(EXECUTABLE_NAME)
+$(BUILD_DIR)/$(EXECUTABLE_NAME): $(OBJS)
+	clang++ $(OBJS) -o $(BUILD_DIR)/$(EXECUTABLE_NAME)
 
-$(BUILD_DIR)/main.o: ${SRC_DIR}/main.cpp
-	clang++ -c ${SRC_DIR}/main.cpp -o $(BUILD_DIR)/main.o
+$(BUILD_DIR)/%.cpp.o: %.cpp
+	mkdir -p $(dir $@)
+	clang++ -c $< -o $@
 
 
 
 .PHONY: run
 run:
 	$(BUILD_DIR)/$(EXECUTABLE_NAME)
-
-.PHONY: install
-install:
-	mkdir -p $(BUILD_DIR)
 
 
 .PHONY: clean 
