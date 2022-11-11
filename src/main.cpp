@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <vector>
+
 #include "rom.h"
 
 using namespace std;
@@ -18,13 +18,9 @@ int main(int argc, char **argv)
 
     fileName = argv[1];
 
-    cout << fileName << endl;
+    Rom rom(fileName);
 
-    ifstream file(fileName, ios::binary);
-    vector<unsigned char> buffer(istreambuf_iterator<char>(file), {});
-    file.close();
-
-    testFunc();
+    rom.printTest();
 
     return 0;
 }
