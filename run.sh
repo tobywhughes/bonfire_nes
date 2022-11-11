@@ -1,3 +1,3 @@
 #! /bin/sh
 make
-./build/bonfire_nes.exe "@"
+./build/bonfire_nes "$@"
