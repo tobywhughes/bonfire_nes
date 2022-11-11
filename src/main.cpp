@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include "rom.h"
 
 using namespace std;
 
@@ -22,6 +23,8 @@ int main(int argc, char **argv)
     ifstream file(fileName, ios::binary);
     vector<unsigned char> buffer(istreambuf_iterator<char>(file), {});
     file.close();
+
+    testFunc();
 
     return 0;
 }
