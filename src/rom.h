@@ -19,13 +19,17 @@ class Rom
 {
 private:
     std::vector<uint8_t> buffer;
+    std::vector<uint8_t> prgRom;
     RomHeaderData romHeaderData;
 
     void readInBootRomHeader(Mapper &mapper);
+    void readInPrgRom();
+    uint16_t getPrgRomSizeBytes();
 
 public:
     Rom(std::string fileName);
     void initialize(Mapper &mapper);
+    uint8_t readPrg(Mapper &mapper, uint16_t address);
 };
 
 #endif

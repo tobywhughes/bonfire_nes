@@ -17,6 +17,7 @@ int main(int argc, char **argv)
     Mapper mapper;
 
     rom.initialize(mapper);
+    cout << "Test reset vector: 0x" << hex << (int)rom.readPrg(mapper, 0xFFFC) << endl;
 
     return 0;
 }

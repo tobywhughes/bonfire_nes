@@ -17,11 +17,12 @@ class Mapper
 private:
     uint8_t mapperNumber;
     MapperFormat *mapperFormat;
-    void setMapperFormat();
+    void setMapperFormat(uint8_t prgRomSize);
 
 public:
     Mapper();
-    void detectMapperNumber(uint8_t lowerFlag, uint8_t upperFlag);
+    void detectMapperNumber(uint8_t lowerFlag, uint8_t upperFlag, uint8_t prgRomSize);
+    uint16_t readPrgAddress(uint16_t address);
 };
 
 #endif
