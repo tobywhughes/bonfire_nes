@@ -3,6 +3,7 @@
 #include <string>
 
 #include "rom.h"
+#include "mapper.h"
 
 using namespace std;
 
@@ -13,8 +14,9 @@ int main(int argc, char **argv)
     string fileName = getFileNameFromArgs(argc, argv);
 
     Rom rom(fileName);
+    Mapper mapper;
 
-    rom.printTest();
+    rom.initialize(mapper);
 
     return 0;
 }
