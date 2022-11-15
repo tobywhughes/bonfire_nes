@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <string>
+#include <vector>
 
 #include "MapperFormat/MapperFormat.h"
 #include "MapperFormat/NROM.h"
@@ -22,7 +23,7 @@ private:
 public:
     Mapper();
     void detectMapperNumber(uint8_t lowerFlag, uint8_t upperFlag, uint8_t prgRomSize);
-    uint16_t readPrgAddress(uint16_t address);
+    uint8_t read8(uint16_t address, std::vector<uint8_t> &prgRom);
 };
 
 #endif

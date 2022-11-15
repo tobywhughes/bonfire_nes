@@ -8,11 +8,12 @@ class NROM : public MapperFormat
 {
 private:
     uint8_t m_prgRomSize;
+    uint16_t readPrgAddress(uint16_t address);
 
 public:
     ~NROM() override = default;
     std::string getFormatName() override;
-    uint16_t readPrgAddress(uint16_t address) override;
+    ReadResult read8(uint16_t address) override;
     void initialize(uint8_t prgRomSize) override;
 };
 

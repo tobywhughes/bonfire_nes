@@ -40,9 +40,3 @@ uint16_t Rom::getPrgRomSizeBytes()
 {
     return 16384 * romHeaderData.prgRomSize;
 }
-
-uint8_t Rom::readPrg(Mapper &mapper, uint16_t address)
-{
-    uint16_t mappedAddress = mapper.readPrgAddress(address);
-    return prgRom[mappedAddress];
-}

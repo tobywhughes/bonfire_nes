@@ -29,7 +29,16 @@ void Mapper::setMapperFormat(uint8_t prgRomSize)
     }
 }
 
-uint16_t Mapper::readPrgAddress(uint16_t address)
+uint8_t Mapper::read8(uint16_t address, vector<uint8_t> &prgRom)
 {
-    return mapperFormat->readPrgAddress(address);
+    ReadResult mapResult = mapperFormat->read8(address);
+    switch (mapResult.resultDestination)
+    {
+    case ResultDestination::PRG:
+        return prgRom[mapResult.resultAddress];
+    case ResultDestination::UNKNOWN:
+    default:
+        cout << "Address at (0x" << hex << (int)mapResult.resultAddress << ") was unidentified. Unable to map." << endl;
+        return 0;
+    }
 }

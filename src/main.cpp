@@ -2,8 +2,8 @@
 #include <fstream>
 #include <string>
 
-#include "rom.h"
-#include "mapper.h"
+#include "memory.h"
+#include "cpu.h"
 
 using namespace std;
 
@@ -13,11 +13,10 @@ int main(int argc, char **argv)
 {
     string fileName = getFileNameFromArgs(argc, argv);
 
-    Rom rom(fileName);
-    Mapper mapper;
+    Memory memory(fileName);
 
-    rom.initialize(mapper);
-    cout << "Test reset vector: 0x" << hex << (int)rom.readPrg(mapper, 0xFFFC) << endl;
+    cout << "Test reset vector: 0x" << hex << (int)memory.read8(RESET_VECTOR_ADDRESS) << endl;
+    cout << "Test unmapped: 0x" << hex << (int)memory.read8(0x7FFF) << endl;
 
     return 0;
 }
