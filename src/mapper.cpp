@@ -38,7 +38,7 @@ uint8_t Mapper::read8(uint16_t address, vector<uint8_t> &prgRom)
         return prgRom[mapResult.resultAddress];
     case ResultDestination::UNKNOWN:
     default:
-        cout << "Address at (0x" << hex << (int)mapResult.resultAddress << ") was unidentified. Unable to map." << endl;
+        cout << "Address at {0x" << hex << (int)mapResult.resultAddress << "} was unidentified. Unable to map." << endl;
         return 0;
     }
 }
@@ -56,7 +56,19 @@ uint16_t Mapper::read16(uint16_t address, vector<uint8_t> &prgRom)
         return (uint16_t)prgRom[mapResult.resultAddress] | ((uint16_t)prgRom[mapResult.resultAddress + 1] << 8);
     case ResultDestination::UNKNOWN:
     default:
-        cout << "Address at (0x" << hex << (int)mapResult.resultAddress << ") was unidentified. Unable to map." << endl;
+        cout << "Address at {0x" << hex << (int)mapResult.resultAddress << "} was unidentified. Unable to map." << endl;
         return 0;
+    }
+}
+
+void Mapper::write8(uint16_t address, uint8_t value, vector<uint8_t> &internalRam)
+{
+    if (address < 0x800)
+    {
+        internalRam[address] = value;
+    }
+    else
+    {
+        cout << "Address at {0x" << hex << (int)address << "} was unidentified. Unable to set value: 0x" << hex << (int)value << endl;
     }
 }

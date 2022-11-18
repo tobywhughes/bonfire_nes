@@ -38,6 +38,9 @@ void CPU::execute(Memory &memory)
     case Opcode::JUMP_ABSOLUTE:
         jumpAbsolute(memory);
         break;
+    case Opcode::STORE_ACCUMULATOR_AT_ABSOLUTE:
+        storeAccumulatorAtAbsolute(memory);
+        break;
     case Opcode::UNKNOWN_OPCODE:
     default:
         cout << "Unimplemented Opcode: 0x" << hex << (int)opcode << endl;
@@ -67,6 +70,18 @@ void CPU::jumpAbsolute(Memory &memory)
     m_programCounter = absoluteAddress;
 }
 
+void CPU::storeAccumulatorAtAbsolute(Memory &memory)
+{
+    uint16_t absoluteAddress = memory.read16(m_programCounter);
+    m_programCounter += 2;
+
+    memory.write8(absoluteAddress, m_accumulator);
+
+    ostringstream verboseString;
+    verboseString << "Storing Accumulator value 0x" << hex << int(m_accumulator) << " at address {0x" << hex << int(absoluteAddress) << "}";
+    printVerbose(verboseString.str());
+}
+
 void CPU::printVerbose(string verboseString)
 {
     if (PRINT_VERBOSE_OPCODE_DEBUG)
@@ -86,6 +101,9 @@ void CPU::opcodeDebugOutput(uint8_t opcode)
         break;
     case Opcode::JUMP_ABSOLUTE:
         opcodeDebugString = "Jump Absolute";
+        break;
+    case Opcode::STORE_ACCUMULATOR_AT_ABSOLUTE:
+        opcodeDebugString = "Store Accumulator At Absolute";
         break;
     case Opcode::UNKNOWN_OPCODE:
     default:

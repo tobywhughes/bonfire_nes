@@ -16,6 +16,7 @@ enum Opcode
 {
     JUMP_ABSOLUTE = 0x4C,
     SET_INTERRUPT_DISABLE = 0x78,
+    STORE_ACCUMULATOR_AT_ABSOLUTE = 0x8D,
     UNKNOWN_OPCODE,
 };
 
@@ -34,6 +35,7 @@ private:
     void setInterruptDisable();
     void jumpAbsolute(Memory &memory);
     void printVerbose(std::string verboseString);
+    void storeAccumulatorAtAbsolute(Memory &memory);
 
 public:
     CPU();
