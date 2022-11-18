@@ -14,6 +14,7 @@ private:
 public:
     Memory(std::string fileName);
     uint8_t read8(uint16_t address);
+    uint16_t read16(uint16_t address);
 };
 
 #endif

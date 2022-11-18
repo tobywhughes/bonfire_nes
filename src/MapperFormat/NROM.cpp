@@ -8,7 +8,7 @@ string NROM::getFormatName()
     return "NROM - 0x00";
 }
 
-ReadResult NROM::read8(uint16_t address)
+ReadResult NROM::read(uint16_t address)
 {
     if (address >= 0x8000)
     {

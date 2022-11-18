@@ -2,8 +2,7 @@
 #include <fstream>
 #include <string>
 
-#include "memory.h"
-#include "cpu.h"
+#include "system.h"
 
 using namespace std;
 
@@ -13,10 +12,9 @@ int main(int argc, char **argv)
 {
     string fileName = getFileNameFromArgs(argc, argv);
 
-    Memory memory(fileName);
+    System system(fileName);
 
-    cout << "Test reset vector: 0x" << hex << (int)memory.read8(RESET_VECTOR_ADDRESS) << endl;
-    cout << "Test unmapped: 0x" << hex << (int)memory.read8(0x7FFF) << endl;
+    system.start();
 
     return 0;
 }

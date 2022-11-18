@@ -13,7 +13,7 @@ private:
 public:
     ~NROM() override = default;
     std::string getFormatName() override;
-    ReadResult read8(uint16_t address) override;
+    ReadResult read(uint16_t address) override;
     void initialize(uint8_t prgRomSize) override;
 };
 
