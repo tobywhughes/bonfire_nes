@@ -1,5 +1,6 @@
 #include <iostream>
 #include "cpu.h"
+#include "terminal.h"
 #include <sstream>
 #include <bitset>
 
@@ -20,7 +21,7 @@ CPU::CPU()
 void CPU::initialize(Memory &memory)
 {
     m_programCounter = memory.read16(RESET_VECTOR_ADDRESS);
-    cout << "PC Initialized To: 0x" << hex << (int)m_programCounter << endl;
+    cout << T_DEBUG << "PC Initialized To: 0x" << hex << (int)m_programCounter << endl;
 }
 
 void CPU::execute(Memory &memory)
@@ -41,10 +42,13 @@ void CPU::execute(Memory &memory)
     case Opcode::STORE_ACCUMULATOR_AT_ABSOLUTE:
         storeAccumulatorAtAbsolute(memory);
         break;
+    case Opcode::LOAD_ACCUMULATOR_WITH_IMMEDIATE:
+        loadAccumulatorWithImmediate(memory);
+        break;
     case Opcode::UNKNOWN_OPCODE:
     default:
-        cout << "Unimplemented Opcode: 0x" << hex << (int)opcode << endl;
-        cout << "Exiting Program" << endl;
+        cout << T_ERROR << "Unimplemented Opcode: 0x" << hex << (int)opcode << endl;
+        cout << T_ERROR << "Exiting Program" << endl;
         exit(0);
         break;
     }
@@ -82,11 +86,21 @@ void CPU::storeAccumulatorAtAbsolute(Memory &memory)
     printVerbose(verboseString.str());
 }
 
+void CPU::loadAccumulatorWithImmediate(Memory &memory)
+{
+    uint8_t immediateValue = memory.read8(m_programCounter);
+    m_programCounter += 1;
+
+    ostringstream verboseString;
+    verboseString << "Loading Accumulator with value 0x" << hex << int(immediateValue);
+    printVerbose(verboseString.str());
+}
+
 void CPU::printVerbose(string verboseString)
 {
     if (PRINT_VERBOSE_OPCODE_DEBUG)
     {
-        cout << ":: " << verboseString << endl;
+        cout << T_DEBUG << verboseString << endl;
     }
 }
 
@@ -103,7 +117,10 @@ void CPU::opcodeDebugOutput(uint8_t opcode)
         opcodeDebugString = "Jump Absolute";
         break;
     case Opcode::STORE_ACCUMULATOR_AT_ABSOLUTE:
-        opcodeDebugString = "Store Accumulator At Absolute";
+        opcodeDebugString = "Store Accumulator At Absolute Address";
+        break;
+    case Opcode::LOAD_ACCUMULATOR_WITH_IMMEDIATE:
+        opcodeDebugString = "Load Accumulator With Immediate Value";
         break;
     case Opcode::UNKNOWN_OPCODE:
     default:
@@ -112,6 +129,7 @@ void CPU::opcodeDebugOutput(uint8_t opcode)
 
     if (PRINT_OPCODE_DEBUG)
     {
-        cout << "[0x" << hex << (int)m_programCounter << "] 0x" << hex << (int)opcode << " - " << opcodeDebugString << endl;
+        cout << T_INFO
+             << "[0x" << hex << (int)m_programCounter << "] 0x" << hex << (int)opcode << " - " << opcodeDebugString << endl;
     }
 }

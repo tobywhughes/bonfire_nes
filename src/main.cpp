@@ -3,6 +3,7 @@
 #include <string>
 
 #include "system.h"
+#include "terminal.h"
 
 using namespace std;
 
@@ -23,7 +24,7 @@ string getFileNameFromArgs(int argc, char **argv)
 {
     if (argc <= 1)
     {
-        cout << "Must provide ROM" << endl;
+        cout << T_ERROR << "Must provide ROM" << endl;
         exit(0);
     }
 

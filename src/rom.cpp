@@ -2,12 +2,13 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
+#include "terminal.h"
 
 using namespace std;
 
 Rom::Rom(string fileName)
 {
-    cout << "ROM Filename: " << fileName << endl;
+    cout << T_DEBUG << "ROM Filename: " << fileName << endl;
     ifstream file(fileName, ios::binary);
     buffer = vector<uint8_t>(istreambuf_iterator<char>(file), {});
     file.close();

@@ -1,5 +1,6 @@
 #include <iostream>
 #include "mapper.h"
+#include "terminal.h"
 
 using namespace std;
 
@@ -11,7 +12,7 @@ void Mapper::detectMapperNumber(uint8_t lowerFlag, uint8_t upperFlag, uint8_t pr
 {
     mapperNumber = (lowerFlag >> 4) | (upperFlag & 0xF0);
     setMapperFormat(prgRomSize);
-    cout << "Mapper Format: " << mapperFormat->getFormatName() << endl;
+    cout << T_INFO << "Mapper Format: " << mapperFormat->getFormatName() << endl;
     // std::cout << "Mapper number: " << mapperTypeName(mapperNumber) << std::endl;
 };
 
@@ -24,7 +25,7 @@ void Mapper::setMapperFormat(uint8_t prgRomSize)
         mapperFormat->initialize(prgRomSize);
         break;
     default:
-        cout << "Unimplemented Mapper. Exiting" << endl;
+        cout << T_ERROR << "Unimplemented Mapper. Exiting" << endl;
         exit(0);
     }
 }
@@ -38,7 +39,7 @@ uint8_t Mapper::read8(uint16_t address, vector<uint8_t> &prgRom)
         return prgRom[mapResult.resultAddress];
     case ResultDestination::UNKNOWN:
     default:
-        cout << "Address at {0x" << hex << (int)mapResult.resultAddress << "} was unidentified. Unable to map." << endl;
+        cout << T_WARNING << "Address at {0x" << hex << (int)mapResult.resultAddress << "} is unmapped - Unable to read" << endl;
         return 0;
     }
 }
@@ -56,7 +57,7 @@ uint16_t Mapper::read16(uint16_t address, vector<uint8_t> &prgRom)
         return (uint16_t)prgRom[mapResult.resultAddress] | ((uint16_t)prgRom[mapResult.resultAddress + 1] << 8);
     case ResultDestination::UNKNOWN:
     default:
-        cout << "Address at {0x" << hex << (int)mapResult.resultAddress << "} was unidentified. Unable to map." << endl;
+        cout << T_WARNING << "Address at {0x" << hex << (int)mapResult.resultAddress << "} is unmapped - Unable to read" << endl;
         return 0;
     }
 }
@@ -69,6 +70,6 @@ void Mapper::write8(uint16_t address, uint8_t value, vector<uint8_t> &internalRa
     }
     else
     {
-        cout << "Address at {0x" << hex << (int)address << "} was unidentified. Unable to set value: 0x" << hex << (int)value << endl;
+        cout << T_WARNING << "Address at {0x" << hex << (int)address << "} is unmapped - Unable to set value: 0x" << hex << (int)value << endl;
     }
 }
