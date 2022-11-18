@@ -1,7 +1,12 @@
 #include <iostream>
 #include "cpu.h"
+#include <sstream>
+#include <bitset>
 
 using namespace std;
+
+const bool PRINT_OPCODE_DEBUG = true;
+const bool PRINT_VERBOSE_OPCODE_DEBUG = PRINT_OPCODE_DEBUG && true;
 
 CPU::CPU()
 {
@@ -30,9 +35,12 @@ void CPU::execute(Memory &memory)
     case Opcode::SET_INTERRUPT_DISABLE:
         setInterruptDisable();
         break;
+    case Opcode::JUMP_ABSOLUTE:
+        jumpAbsolute(memory);
+        break;
     case Opcode::UNKNOWN_OPCODE:
     default:
-        cout << "Unkown Opcode: 0x" << hex << (int)opcode << endl;
+        cout << "Unimplemented Opcode: 0x" << hex << (int)opcode << endl;
         cout << "Exiting Program" << endl;
         exit(0);
         break;
@@ -42,17 +50,50 @@ void CPU::execute(Memory &memory)
 void CPU::setInterruptDisable()
 {
     m_statusRegister = m_statusRegister | 0b00000100;
+
+    ostringstream verboseString;
+    verboseString << "Status Register Updated: 0b" << bitset<8>(m_statusRegister);
+    printVerbose(verboseString.str());
+}
+
+void CPU::jumpAbsolute(Memory &memory)
+{
+    uint16_t absoluteAddress = memory.read16(m_programCounter);
+
+    ostringstream verboseString;
+    verboseString << "Jump to {0x" << hex << int(absoluteAddress) << "}";
+    printVerbose(verboseString.str());
+
+    m_programCounter = absoluteAddress;
+}
+
+void CPU::printVerbose(string verboseString)
+{
+    if (PRINT_VERBOSE_OPCODE_DEBUG)
+    {
+        cout << ":: " << verboseString << endl;
+    }
 }
 
 void CPU::opcodeDebugOutput(uint8_t opcode)
 {
+    string opcodeDebugString;
+
     switch (opcode)
     {
     case Opcode::SET_INTERRUPT_DISABLE:
-        cout << "[0x" << hex << (int)m_programCounter << "] 0x" << hex << (int)opcode << " - Set Interrupt Disable" << endl;
+        opcodeDebugString = "Set Interrupt Disable";
+        break;
+    case Opcode::JUMP_ABSOLUTE:
+        opcodeDebugString = "Jump Absolute";
         break;
     case Opcode::UNKNOWN_OPCODE:
     default:
-        cout << "[0x" << hex << (int)m_programCounter << "] 0x" << hex << (int)opcode << " - Unknown Opcode" << endl;
+        opcodeDebugString = "Unknown Opcode";
+    }
+
+    if (PRINT_OPCODE_DEBUG)
+    {
+        cout << "[0x" << hex << (int)m_programCounter << "] 0x" << hex << (int)opcode << " - " << opcodeDebugString << endl;
     }
 }

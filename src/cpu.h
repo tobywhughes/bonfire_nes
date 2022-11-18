@@ -2,6 +2,7 @@
 #define CPU_H
 
 #include <stdint.h>
+#include <string>
 #include "memory.h"
 
 const uint16_t RESET_VECTOR_ADDRESS = 0xFFFC;
@@ -13,6 +14,7 @@ const uint8_t POWER_UP_STATUS_Y_INDEX = 0x00;
 
 enum Opcode
 {
+    JUMP_ABSOLUTE = 0x4C,
     SET_INTERRUPT_DISABLE = 0x78,
     UNKNOWN_OPCODE,
 };
@@ -30,6 +32,8 @@ private:
     void opcodeDebugOutput(uint8_t opcode);
 
     void setInterruptDisable();
+    void jumpAbsolute(Memory &memory);
+    void printVerbose(std::string verboseString);
 
 public:
     CPU();
