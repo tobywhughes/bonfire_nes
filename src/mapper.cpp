@@ -62,11 +62,15 @@ uint16_t Mapper::read16(uint16_t address, vector<uint8_t> &prgRom)
     }
 }
 
-void Mapper::write8(uint16_t address, uint8_t value, vector<uint8_t> &internalRam)
+void Mapper::write8(uint16_t address, uint8_t value, vector<uint8_t> &internalRam, PPU ppu)
 {
     if (address < 0x800)
     {
         internalRam[address] = value;
+    }
+    else if ((address >= 0x2000 && address <= 0x2007) || address == 0x4014)
+    {
+        ppu.writeRegister(address, value);
     }
     else
     {

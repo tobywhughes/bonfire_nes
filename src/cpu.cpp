@@ -45,6 +45,21 @@ void CPU::execute(Memory &memory)
     case Opcode::LOAD_ACCUMULATOR_WITH_IMMEDIATE:
         loadAccumulatorWithImmediate(memory);
         break;
+    case Opcode::LOAD_INDEX_X_WITH_IMMEDIATE:
+        loadXIndexWithImmediate(memory);
+        break;
+    case Opcode::CLEAR_DECIMAL_MODE:
+        clearDecimalMode();
+        break;
+    case Opcode::TRANSFER_INDEX_X_TO_STACK_POINTER:
+        transferIndexXToStackPointer();
+        break;
+    case Opcode::INCREMENT_INDEX_X:
+        incrementIndexX();
+        break;
+    case Opcode::STORE_INDEX_X_AT_ABSOLUTE:
+        storeIndexXAtAbsolute(memory);
+        break;
     case Opcode::UNKNOWN_OPCODE:
     default:
         cout << T_ERROR << "Unimplemented Opcode: 0x" << hex << (int)opcode << endl;
@@ -86,13 +101,66 @@ void CPU::storeAccumulatorAtAbsolute(Memory &memory)
     printVerbose(verboseString.str());
 }
 
+void CPU::storeIndexXAtAbsolute(Memory &memory)
+{
+    uint16_t absoluteAddress = memory.read16(m_programCounter);
+    m_programCounter += 2;
+
+    memory.write8(absoluteAddress, m_xIndex);
+
+    ostringstream verboseString;
+    verboseString << "Storing Index X value 0x" << hex << int(m_xIndex) << " at address {0x" << hex << int(absoluteAddress) << "}";
+    printVerbose(verboseString.str());
+}
+
 void CPU::loadAccumulatorWithImmediate(Memory &memory)
 {
     uint8_t immediateValue = memory.read8(m_programCounter);
     m_programCounter += 1;
 
+    m_accumulator = immediateValue;
+
     ostringstream verboseString;
     verboseString << "Loading Accumulator with value 0x" << hex << int(immediateValue);
+    printVerbose(verboseString.str());
+}
+
+void CPU::loadXIndexWithImmediate(Memory &memory)
+{
+    uint8_t immediateValue = memory.read8(m_programCounter);
+    m_programCounter += 1;
+
+    m_xIndex = immediateValue;
+
+    ostringstream verboseString;
+    verboseString << "Loading Accumulator with value 0x" << hex << int(immediateValue);
+    printVerbose(verboseString.str());
+}
+
+void CPU::clearDecimalMode()
+{
+    m_statusRegister = m_statusRegister & 0b11111101;
+
+    ostringstream verboseString;
+    verboseString << "Status Register Updated: 0b" << bitset<8>(m_statusRegister);
+    printVerbose(verboseString.str());
+}
+
+void CPU::transferIndexXToStackPointer()
+{
+    m_stackPointer = m_xIndex;
+
+    ostringstream verboseString;
+    verboseString << "Loading Stack Pointer with value 0x" << hex << int(m_stackPointer);
+    printVerbose(verboseString.str());
+}
+
+void CPU::incrementIndexX()
+{
+    m_xIndex += 1;
+
+    ostringstream verboseString;
+    verboseString << "Index X  incremented with value 0x" << hex << int(m_xIndex);
     printVerbose(verboseString.str());
 }
 
@@ -111,16 +179,31 @@ void CPU::opcodeDebugOutput(uint8_t opcode)
     switch (opcode)
     {
     case Opcode::SET_INTERRUPT_DISABLE:
-        opcodeDebugString = "Set Interrupt Disable";
+        opcodeDebugString = "<SIE> Set Interrupt Disable";
         break;
     case Opcode::JUMP_ABSOLUTE:
-        opcodeDebugString = "Jump Absolute";
+        opcodeDebugString = "<JMP> abs Jump Absolute";
         break;
     case Opcode::STORE_ACCUMULATOR_AT_ABSOLUTE:
-        opcodeDebugString = "Store Accumulator At Absolute Address";
+        opcodeDebugString = "<STA abs> Store Accumulator At Absolute Address";
         break;
     case Opcode::LOAD_ACCUMULATOR_WITH_IMMEDIATE:
-        opcodeDebugString = "Load Accumulator With Immediate Value";
+        opcodeDebugString = "<LDA imm> Load Accumulator With Immediate Value";
+        break;
+    case Opcode::CLEAR_DECIMAL_MODE:
+        opcodeDebugString = "<CLD> Clear Decimal Mode";
+        break;
+    case Opcode::LOAD_INDEX_X_WITH_IMMEDIATE:
+        opcodeDebugString = "<LDC imm> - Load Index X With Immediate Value";
+        break;
+    case Opcode::TRANSFER_INDEX_X_TO_STACK_POINTER:
+        opcodeDebugString = "<TXS> - Transfer Index X To Stack Pointer";
+        break;
+    case Opcode::INCREMENT_INDEX_X:
+        opcodeDebugString = "<INX> - Increment Index X";
+        break;
+    case Opcode::STORE_INDEX_X_AT_ABSOLUTE:
+        opcodeDebugString = "<STX abs> Store Index X At Absolute Address";
         break;
     case Opcode::UNKNOWN_OPCODE:
     default:

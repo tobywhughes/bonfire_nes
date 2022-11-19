@@ -16,8 +16,13 @@ enum Opcode
 {
     JUMP_ABSOLUTE = 0x4C,
     SET_INTERRUPT_DISABLE = 0x78,
-    LOAD_ACCUMULATOR_WITH_IMMEDIATE = 0xA9,
     STORE_ACCUMULATOR_AT_ABSOLUTE = 0x8D,
+    STORE_INDEX_X_AT_ABSOLUTE = 0x8E,
+    TRANSFER_INDEX_X_TO_STACK_POINTER = 0x9A,
+    LOAD_INDEX_X_WITH_IMMEDIATE = 0xA2,
+    LOAD_ACCUMULATOR_WITH_IMMEDIATE = 0xA9,
+    CLEAR_DECIMAL_MODE = 0xD8,
+    INCREMENT_INDEX_X = 0xE8,
     UNKNOWN_OPCODE,
 };
 
@@ -34,10 +39,15 @@ private:
     void opcodeDebugOutput(uint8_t opcode);
 
     void setInterruptDisable();
+    void clearDecimalMode();
     void jumpAbsolute(Memory &memory);
     void printVerbose(std::string verboseString);
     void storeAccumulatorAtAbsolute(Memory &memory);
     void loadAccumulatorWithImmediate(Memory &memory);
+    void loadXIndexWithImmediate(Memory &memory);
+    void transferIndexXToStackPointer();
+    void incrementIndexX();
+    void storeIndexXAtAbsolute(Memory &memory);
 
 public:
     CPU();
