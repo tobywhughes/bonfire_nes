@@ -14,6 +14,7 @@ const uint8_t POWER_UP_STATUS_Y_INDEX = 0x00;
 
 enum Opcode
 {
+    JUMP_ABSOLUTE_SAVE_RETURN = 0x20,
     JUMP_ABSOLUTE = 0x4C,
     SET_INTERRUPT_DISABLE = 0x78,
     STORE_ACCUMULATOR_AT_ABSOLUTE = 0x8D,
@@ -48,6 +49,7 @@ private:
     void transferIndexXToStackPointer();
     void incrementIndexX();
     void storeIndexXAtAbsolute(Memory &memory);
+    void jumpAbsoluteSaveReturn(Memory &memory);
 
 public:
     CPU();

@@ -60,6 +60,9 @@ void CPU::execute(Memory &memory)
     case Opcode::STORE_INDEX_X_AT_ABSOLUTE:
         storeIndexXAtAbsolute(memory);
         break;
+    case Opcode::JUMP_ABSOLUTE_SAVE_RETURN:
+        jumpAbsoluteSaveReturn(memory);
+        break;
     case Opcode::UNKNOWN_OPCODE:
     default:
         cout << T_ERROR << "Unimplemented Opcode: 0x" << hex << (int)opcode << endl;
@@ -164,6 +167,30 @@ void CPU::incrementIndexX()
     printVerbose(verboseString.str());
 }
 
+void CPU::jumpAbsoluteSaveReturn(Memory &memory)
+{
+    uint16_t absoluteAddress = memory.read16(m_programCounter);
+    m_programCounter += 2;
+
+    uint8_t programCounterHigh = (uint8_t)(m_programCounter >> 8);
+    uint8_t programCounterLow = (uint8_t)m_programCounter;
+
+    uint16_t stackOffset = 0x100;
+
+    memory.write8(stackOffset + m_stackPointer, programCounterHigh);
+    m_stackPointer -= 1;
+    memory.write8(stackOffset + m_stackPointer, programCounterHigh);
+    m_stackPointer -= 1;
+
+    m_programCounter = absoluteAddress;
+
+    ostringstream verboseString;
+    verboseString << "Jump to {0x" << hex << int(absoluteAddress) << "} with return address {0x"
+                  << hex << (int)programCounterHigh << hex << (int)programCounterLow << "}" << endl;
+    verboseString << T_DEBUG << "New Stack Pointer value: 0x" << hex << (int)m_stackPointer;
+    printVerbose(verboseString.str());
+}
+
 void CPU::printVerbose(string verboseString)
 {
     if (PRINT_VERBOSE_OPCODE_DEBUG)
@@ -182,7 +209,7 @@ void CPU::opcodeDebugOutput(uint8_t opcode)
         opcodeDebugString = "<SIE> Set Interrupt Disable";
         break;
     case Opcode::JUMP_ABSOLUTE:
-        opcodeDebugString = "<JMP> abs Jump Absolute";
+        opcodeDebugString = "<JMP abs> Jump Absolute";
         break;
     case Opcode::STORE_ACCUMULATOR_AT_ABSOLUTE:
         opcodeDebugString = "<STA abs> Store Accumulator At Absolute Address";
@@ -204,6 +231,9 @@ void CPU::opcodeDebugOutput(uint8_t opcode)
         break;
     case Opcode::STORE_INDEX_X_AT_ABSOLUTE:
         opcodeDebugString = "<STX abs> Store Index X At Absolute Address";
+        break;
+    case Opcode::JUMP_ABSOLUTE_SAVE_RETURN:
+        opcodeDebugString = "<JSR abs> Jump Absolute Save Return Address";
         break;
     case Opcode::UNKNOWN_OPCODE:
     default:
