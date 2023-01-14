@@ -158,8 +158,6 @@ void CPU::storeAccumulatorAtIndirectYIndexed(Memory &memory)
 
     lookupValue |= lookupValueLow;
 
-    cout << hex << int(lookupValue) << endl;
-
     memory.write8(lookupValue, m_accumulator);
 
     ostringstream verboseString;
