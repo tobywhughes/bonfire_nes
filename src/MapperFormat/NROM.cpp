@@ -16,6 +16,12 @@ ReadResult NROM::read(uint16_t address)
             ResultDestination::PRG,
             readPrgAddress(address)};
     }
+    else if (address < 0x0800)
+    {
+        return ReadResult{
+            ResultDestination::INTERNAL_RAM,
+            address};
+    }
     else
     {
         return ReadResult{

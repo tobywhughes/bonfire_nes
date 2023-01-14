@@ -69,6 +69,12 @@ void CPU::execute(Memory &memory)
     case Opcode::STORE_INDEX_Y_AT_ZERO_PAGE:
         storeIndexYAtZeroPage(memory);
         break;
+    case Opcode::STORE_INDEX_X_AT_ZERO_PAGE:
+        storeIndexXAtZeroPage(memory);
+        break;
+    case Opcode::STORE_ACCUMULATOR_AT_INDIRECT_Y_INDEXED:
+        storeAccumulatorAtIndirectYIndexed(memory);
+        break;
     case Opcode::UNKNOWN_OPCODE:
     default:
         cout << T_ERROR << "Unimplemented Opcode: 0x" << hex << (int)opcode << endl;
@@ -118,6 +124,48 @@ void CPU::storeIndexYAtZeroPage(Memory &memory)
     uint16_t zeroPagedAddress = 0x0000 | address;
 
     memory.write8(zeroPagedAddress, m_yIndex);
+
+    ostringstream verboseString;
+    verboseString << "Storing Index Y value 0x" << hex << int(m_yIndex) << " at zero page address {0x" << hex << int(zeroPagedAddress) << "}";
+    printVerbose(verboseString.str());
+}
+
+void CPU::storeAccumulatorAtIndirectYIndexed(Memory &memory)
+{
+    uint8_t operand = memory.read8(m_programCounter);
+    m_programCounter += 1;
+
+    uint16_t zeroPagedInitialLookupAddress = 0x0000 | operand;
+
+    uint16_t lookupValue = memory.read16(zeroPagedInitialLookupAddress);
+
+    cout << hex << int(zeroPagedInitialLookupAddress) << endl;
+
+    cout << hex << int(lookupValue) << endl;
+
+    lookupValue += m_yIndex;
+
+    cout << hex << int(lookupValue) << endl;
+
+    memory.write8(lookupValue, m_accumulator);
+
+    ostringstream verboseString;
+    verboseString << "Storing Accumulator value 0x" << hex << int(m_accumulator) << " at address {0x" << hex << int(lookupValue) << "}";
+    printVerbose(verboseString.str());
+}
+
+void CPU::storeIndexXAtZeroPage(Memory &memory)
+{
+    uint8_t address = memory.read8(m_programCounter);
+    m_programCounter += 1;
+
+    uint16_t zeroPagedAddress = 0x0000 | address;
+
+    memory.write8(zeroPagedAddress, m_xIndex);
+
+    ostringstream verboseString;
+    verboseString << "Storing Index X value 0x" << hex << int(m_xIndex) << " at zero page address {0x" << hex << int(zeroPagedAddress) << "}";
+    printVerbose(verboseString.str());
 }
 
 void CPU::storeIndexXAtAbsolute(Memory &memory)
@@ -268,6 +316,12 @@ void CPU::opcodeDebugOutput(uint8_t opcode)
         break;
     case Opcode::STORE_INDEX_Y_AT_ZERO_PAGE:
         opcodeDebugString = "<STY d> - Store Index Y At Zero Page Address";
+        break;
+    case Opcode::STORE_INDEX_X_AT_ZERO_PAGE:
+        opcodeDebugString = "<STX d> - Store Index X At Zero Page Address";
+        break;
+    case Opcode::STORE_ACCUMULATOR_AT_INDIRECT_Y_INDEXED:
+        opcodeDebugString = "<STA (d),y> - Store Accumulator At indirect y-indexed";
         break;
     case Opcode::UNKNOWN_OPCODE:
     default:

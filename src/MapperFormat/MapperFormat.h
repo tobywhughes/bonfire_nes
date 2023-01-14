@@ -6,6 +6,7 @@
 enum ResultDestination
 {
     PRG,
+    INTERNAL_RAM,
     UNKNOWN,
 };
 

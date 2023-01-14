@@ -26,6 +26,8 @@ enum Opcode
     CLEAR_DECIMAL_MODE = 0xD8,
     INCREMENT_INDEX_X = 0xE8,
     STORE_INDEX_Y_AT_ZERO_PAGE = 0x84,
+    STORE_INDEX_X_AT_ZERO_PAGE = 0x86,
+    STORE_ACCUMULATOR_AT_INDIRECT_Y_INDEXED = 0x91,
     UNKNOWN_OPCODE,
 };
 
@@ -54,6 +56,8 @@ private:
     void storeIndexXAtAbsolute(Memory &memory);
     void jumpAbsoluteSaveReturn(Memory &memory);
     void storeIndexYAtZeroPage(Memory &memory);
+    void storeIndexXAtZeroPage(Memory &memory);
+    void storeAccumulatorAtIndirectYIndexed(Memory &memory);
 
 public:
     CPU();
