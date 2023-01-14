@@ -30,13 +30,15 @@ void Mapper::setMapperFormat(uint8_t prgRomSize)
     }
 }
 
-uint8_t Mapper::read8(uint16_t address, vector<uint8_t> &prgRom)
+uint8_t Mapper::read8(uint16_t address, vector<uint8_t> &prgRom, vector<uint8_t> &internalRam)
 {
     ReadResult mapResult = mapperFormat->read(address);
     switch (mapResult.resultDestination)
     {
     case ResultDestination::PRG:
         return prgRom[mapResult.resultAddress];
+    case ResultDestination::INTERNAL_RAM:
+        return internalRam[mapResult.resultAddress];
     case ResultDestination::UNKNOWN:
     default:
         cout << T_WARNING << "Address at {0x" << hex << (int)mapResult.resultAddress << "} is unmapped - Unable to read" << endl;

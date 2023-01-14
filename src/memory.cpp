@@ -9,7 +9,7 @@ Memory::Memory(string fileName) : m_rom(fileName), m_internalRAM(0x800, 0), m_pp
 
 uint8_t Memory::read8(uint16_t address)
 {
-    return m_mapper.read8(address, m_rom.prgRom);
+    return m_mapper.read8(address, m_rom.prgRom, m_internalRAM);
 }
 
 uint16_t Memory::read16(uint16_t address)

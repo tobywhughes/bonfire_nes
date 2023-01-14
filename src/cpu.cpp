@@ -7,7 +7,7 @@
 using namespace std;
 
 const bool PRINT_OPCODE_DEBUG = true;
-const bool PRINT_STATUS_DEBUG = true;
+const bool PRINT_STATUS_DEBUG = false;
 const bool PRINT_VERBOSE_OPCODE_DEBUG = PRINT_OPCODE_DEBUG && true;
 
 CPU::CPU()
@@ -81,6 +81,9 @@ void CPU::execute(Memory &memory)
         break;
     case Opcode::BRANCH_ON_ZERO_CLEAR:
         branchOnZeroClear(memory);
+        break;
+    case Opcode::INCREMENT_ZERO_PAGED_ADDRESS:
+        incrementZeroPagedAddress(memory);
         break;
     case Opcode::UNKNOWN_OPCODE:
     default:
@@ -252,7 +255,7 @@ void CPU::incrementIndexX()
     status_setZero(m_xIndex == 0);
 
     ostringstream verboseString;
-    verboseString << "Index X  incremented to value 0x" << hex << int(m_xIndex);
+    verboseString << "Index X incremented to value 0x" << hex << int(m_xIndex);
     printVerbose(verboseString.str());
 }
 
@@ -264,7 +267,28 @@ void CPU::incrementIndexY()
     status_setZero(m_yIndex == 0);
 
     ostringstream verboseString;
-    verboseString << "Index Y  incremented to value 0x" << hex << int(m_yIndex);
+    verboseString << "Index Y incremented to value 0x" << hex << int(m_yIndex);
+    printVerbose(verboseString.str());
+}
+
+void CPU::incrementZeroPagedAddress(Memory &memory)
+{
+    uint8_t address = memory.read8(m_programCounter);
+    m_programCounter += 1;
+
+    uint16_t zeroPagedAddress = 0x0000 | address;
+
+    uint8_t value = memory.read8(zeroPagedAddress);
+
+    value += 1;
+
+    memory.write8(zeroPagedAddress, value);
+
+    status_setNegative((value & 0b10000000) != 0);
+    status_setZero(value == 0);
+
+    ostringstream verboseString;
+    verboseString << "Zero Page Address {0x" << hex << int(zeroPagedAddress) << "} incremented to value 0x" << hex << int(value);
     printVerbose(verboseString.str());
 }
 
@@ -396,6 +420,9 @@ void CPU::opcodeDebugOutput(uint8_t opcode)
         break;
     case Opcode::BRANCH_ON_ZERO_CLEAR:
         opcodeDebugString = "<BNE rel> - Branch On Zero Clear";
+        break;
+    case Opcode::INCREMENT_ZERO_PAGED_ADDRESS:
+        opcodeDebugString = "<INC d> - Increment Zero Paged Address";
         break;
     case Opcode::UNKNOWN_OPCODE:
     default:

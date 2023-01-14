@@ -29,6 +29,7 @@ enum Opcode
     INCREMENT_INDEX_Y = 0xC8,
     BRANCH_ON_ZERO_CLEAR = 0xD0,
     CLEAR_DECIMAL_MODE = 0xD8,
+    INCREMENT_ZERO_PAGED_ADDRESS = 0xE6,
     INCREMENT_INDEX_X = 0xE8,
     UNKNOWN_OPCODE,
 };
@@ -78,6 +79,7 @@ private:
     void storeAccumulatorAtIndirectYIndexed(Memory &memory);
     void incrementIndexY();
     void branchOnZeroClear(Memory &memory);
+    void incrementZeroPagedAddress(Memory &memory);
 
 public:
     CPU();
