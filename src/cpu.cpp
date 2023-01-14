@@ -7,6 +7,7 @@
 using namespace std;
 
 const bool PRINT_OPCODE_DEBUG = true;
+const bool PRINT_STATUS_DEBUG = true;
 const bool PRINT_VERBOSE_OPCODE_DEBUG = PRINT_OPCODE_DEBUG && true;
 
 CPU::CPU()
@@ -78,6 +79,9 @@ void CPU::execute(Memory &memory)
     case Opcode::STORE_ACCUMULATOR_AT_INDIRECT_Y_INDEXED:
         storeAccumulatorAtIndirectYIndexed(memory);
         break;
+    case Opcode::BRANCH_ON_ZERO_CLEAR:
+        branchOnZeroClear(memory);
+        break;
     case Opcode::UNKNOWN_OPCODE:
     default:
         cout << T_ERROR << "Unimplemented Opcode: 0x" << hex << (int)opcode << endl;
@@ -89,7 +93,7 @@ void CPU::execute(Memory &memory)
 
 void CPU::setInterruptDisable()
 {
-    m_statusRegister = m_statusRegister | 0b00000100;
+    status_setInterrupt(true);
 
     ostringstream verboseString;
     verboseString << "Status Register Updated: 0b" << bitset<8>(m_statusRegister);
@@ -184,6 +188,9 @@ void CPU::loadAccumulatorWithImmediate(Memory &memory)
 
     m_accumulator = immediateValue;
 
+    status_setNegative((m_accumulator & 0b10000000) != 0);
+    status_setZero(m_accumulator == 0);
+
     ostringstream verboseString;
     verboseString << "Loading Accumulator with value 0x" << hex << int(immediateValue);
     printVerbose(verboseString.str());
@@ -195,6 +202,9 @@ void CPU::loadXIndexWithImmediate(Memory &memory)
     m_programCounter += 1;
 
     m_xIndex = immediateValue;
+
+    status_setNegative((m_xIndex & 0b10000000) != 0);
+    status_setZero(m_xIndex == 0);
 
     ostringstream verboseString;
     verboseString << "Loading X Index with value 0x" << hex << int(immediateValue);
@@ -208,6 +218,9 @@ void CPU::loadIndexYWithImmediate(Memory &memory)
 
     m_yIndex = immediateValue;
 
+    status_setNegative((m_yIndex & 0b10000000) != 0);
+    status_setZero(m_yIndex == 0);
+
     ostringstream verboseString;
     verboseString << "Loading Y Index with value 0x" << hex << int(immediateValue);
     printVerbose(verboseString.str());
@@ -215,7 +228,7 @@ void CPU::loadIndexYWithImmediate(Memory &memory)
 
 void CPU::clearDecimalMode()
 {
-    m_statusRegister = m_statusRegister & 0b11111101;
+    status_setDecimal(false);
 
     ostringstream verboseString;
     verboseString << "Status Register Updated: 0b" << bitset<8>(m_statusRegister);
@@ -235,6 +248,9 @@ void CPU::incrementIndexX()
 {
     m_xIndex += 1;
 
+    status_setNegative((m_xIndex & 0b10000000) != 0);
+    status_setZero(m_xIndex == 0);
+
     ostringstream verboseString;
     verboseString << "Index X  incremented to value 0x" << hex << int(m_xIndex);
     printVerbose(verboseString.str());
@@ -243,6 +259,9 @@ void CPU::incrementIndexX()
 void CPU::incrementIndexY()
 {
     m_yIndex += 1;
+
+    status_setNegative((m_yIndex & 0b10000000) != 0);
+    status_setZero(m_yIndex == 0);
 
     ostringstream verboseString;
     verboseString << "Index Y  incremented to value 0x" << hex << int(m_yIndex);
@@ -273,11 +292,54 @@ void CPU::jumpAbsoluteSaveReturn(Memory &memory)
     printVerbose(verboseString.str());
 }
 
+void CPU::branchOnZeroClear(Memory &memory)
+{
+    uint8_t immediateValue = memory.read8(m_programCounter);
+    m_programCounter += 1;
+
+    bool isSigned = (immediateValue & 0b10000000) != 0;
+    if (isSigned)
+    {
+        immediateValue = ~immediateValue + 1;
+    }
+
+    bool zeroStatus = status_getZero();
+
+    ostringstream verboseString;
+
+    if (!zeroStatus)
+    {
+        if (isSigned)
+        {
+            m_programCounter -= immediateValue;
+            verboseString << "BNE - PC decremented by " << unsigned(immediateValue) << " to {0x" << hex << int(m_programCounter) << "}";
+        }
+        else
+        {
+            m_programCounter += immediateValue;
+            verboseString << "BNE - PC incremented by " << unsigned(immediateValue) << " to {0x" << hex << int(m_programCounter) << "}";
+            verboseString << "BNE - No Action Taken";
+        }
+    }
+    else
+    {
+        verboseString << "BNE - No Action Taken";
+    }
+
+    printVerbose(verboseString.str());
+}
+
 void CPU::printVerbose(string verboseString)
 {
     if (PRINT_VERBOSE_OPCODE_DEBUG)
     {
         cout << T_DEBUG << verboseString << endl;
+    }
+
+    if (PRINT_STATUS_DEBUG)
+    {
+        cout << T_DEBUG << "|Status Register: 0b" << bitset<8>(m_statusRegister) << "|" << endl;
+        ;
     }
 }
 
@@ -332,6 +394,9 @@ void CPU::opcodeDebugOutput(uint8_t opcode)
     case Opcode::STORE_ACCUMULATOR_AT_INDIRECT_Y_INDEXED:
         opcodeDebugString = "<STA (d),y> - Store Accumulator At indirect y-indexed";
         break;
+    case Opcode::BRANCH_ON_ZERO_CLEAR:
+        opcodeDebugString = "<BNE rel> - Branch On Zero Clear";
+        break;
     case Opcode::UNKNOWN_OPCODE:
     default:
         opcodeDebugString = "Unknown Opcode";
@@ -342,4 +407,112 @@ void CPU::opcodeDebugOutput(uint8_t opcode)
         cout << T_INFO
              << "[0x" << hex << (int)m_programCounter << "] 0x" << hex << (int)opcode << " - " << opcodeDebugString << endl;
     }
+}
+
+void CPU::status_setNegative(bool value)
+{
+    if (value)
+    {
+        m_statusRegister |= 0b10000000;
+    }
+    else
+    {
+        m_statusRegister &= 0b01111111;
+    }
+}
+
+void CPU::status_setOverflow(bool value)
+{
+    if (value)
+    {
+        m_statusRegister |= 0b01000000;
+    }
+    else
+    {
+        m_statusRegister &= 0b10111111;
+    }
+}
+void CPU::status_setBreak(bool value)
+{
+    if (value)
+    {
+        m_statusRegister |= 0b00010000;
+    }
+    else
+    {
+        m_statusRegister &= 0b11101111;
+    }
+}
+void CPU::status_setDecimal(bool value)
+{
+    if (value)
+    {
+        m_statusRegister |= 0b00001000;
+    }
+    else
+    {
+        m_statusRegister &= 0b11110111;
+    }
+}
+void CPU::status_setInterrupt(bool value)
+{
+    if (value)
+    {
+        m_statusRegister |= 0b00000100;
+    }
+    else
+    {
+        m_statusRegister &= 0b11111011;
+    }
+}
+void CPU::status_setZero(bool value)
+{
+    if (value)
+    {
+        m_statusRegister |= 0b00000010;
+    }
+    else
+    {
+        m_statusRegister &= 0b11111101;
+    }
+}
+void CPU::status_setCarry(bool value)
+{
+    if (value)
+    {
+        m_statusRegister |= 0b00000001;
+    }
+    else
+    {
+        m_statusRegister &= 0b11111110;
+    }
+}
+
+bool CPU::status_getNegative()
+{
+    return (m_statusRegister & 0b10000000) != 0;
+}
+bool CPU::status_getOverflow()
+{
+    return (m_statusRegister & 0b01000000) != 0;
+}
+bool CPU::status_getBreak()
+{
+    return (m_statusRegister & 0b00010000) != 0;
+}
+bool CPU::status_getDecimal()
+{
+    return (m_statusRegister & 0b00001000) != 0;
+}
+bool CPU::status_getInterrupt()
+{
+    return (m_statusRegister & 0b00000100) != 0;
+}
+bool CPU::status_getZero()
+{
+    return (m_statusRegister & 0b00000010) != 0;
+}
+bool CPU::status_getCarry()
+{
+    return (m_statusRegister & 0b00000001) != 0;
 }

@@ -29,6 +29,7 @@ enum Opcode
     STORE_INDEX_X_AT_ZERO_PAGE = 0x86,
     STORE_ACCUMULATOR_AT_INDIRECT_Y_INDEXED = 0x91,
     INCREMENT_INDEX_Y = 0xC8,
+    BRANCH_ON_ZERO_CLEAR = 0xD0,
     UNKNOWN_OPCODE,
 };
 
@@ -43,6 +44,22 @@ private:
     uint8_t m_statusRegister;  // P
 
     void opcodeDebugOutput(uint8_t opcode);
+
+    // status Register
+    void status_setNegative(bool value);
+    void status_setOverflow(bool value);
+    void status_setBreak(bool value);
+    void status_setDecimal(bool value);
+    void status_setInterrupt(bool value);
+    void status_setZero(bool value);
+    void status_setCarry(bool value);
+    bool status_getNegative();
+    bool status_getOverflow();
+    bool status_getBreak();
+    bool status_getDecimal();
+    bool status_getInterrupt();
+    bool status_getZero();
+    bool status_getCarry();
 
     void setInterruptDisable();
     void clearDecimalMode();
@@ -60,6 +77,7 @@ private:
     void storeIndexXAtZeroPage(Memory &memory);
     void storeAccumulatorAtIndirectYIndexed(Memory &memory);
     void incrementIndexY();
+    void branchOnZeroClear(Memory &memory);
 
 public:
     CPU();
