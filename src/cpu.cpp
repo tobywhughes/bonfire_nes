@@ -151,8 +151,14 @@ void CPU::storeAccumulatorAtIndirectYIndexed(Memory &memory)
     uint16_t zeroPagedInitialLookupAddress = 0x0000 | operand;
 
     uint16_t lookupValue = memory.read16(zeroPagedInitialLookupAddress);
+    uint8_t lookupValueLow = (uint8_t)(0x00FF & lookupValue);
 
-    lookupValue += m_yIndex;
+    lookupValue &= 0xFF00;
+    lookupValueLow += m_yIndex;
+
+    lookupValue |= lookupValueLow;
+
+    cout << hex << int(lookupValue) << endl;
 
     memory.write8(lookupValue, m_accumulator);
 
