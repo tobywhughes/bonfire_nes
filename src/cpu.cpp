@@ -48,6 +48,9 @@ void CPU::execute(Memory &memory)
     case Opcode::LOAD_INDEX_X_WITH_IMMEDIATE:
         loadXIndexWithImmediate(memory);
         break;
+    case Opcode::LOAD_INDEX_Y_WITH_IMMEDIATE:
+        loadIndexYWithImmediate(memory);
+        break;
     case Opcode::CLEAR_DECIMAL_MODE:
         clearDecimalMode();
         break;
@@ -62,6 +65,9 @@ void CPU::execute(Memory &memory)
         break;
     case Opcode::JUMP_ABSOLUTE_SAVE_RETURN:
         jumpAbsoluteSaveReturn(memory);
+        break;
+    case Opcode::STORE_INDEX_Y_AT_ZERO_PAGE:
+        storeIndexYAtZeroPage(memory);
         break;
     case Opcode::UNKNOWN_OPCODE:
     default:
@@ -104,6 +110,16 @@ void CPU::storeAccumulatorAtAbsolute(Memory &memory)
     printVerbose(verboseString.str());
 }
 
+void CPU::storeIndexYAtZeroPage(Memory &memory)
+{
+    uint8_t address = memory.read8(m_programCounter);
+    m_programCounter += 1;
+
+    uint16_t zeroPagedAddress = 0x0000 | address;
+
+    memory.write8(zeroPagedAddress, m_yIndex);
+}
+
 void CPU::storeIndexXAtAbsolute(Memory &memory)
 {
     uint16_t absoluteAddress = memory.read16(m_programCounter);
@@ -136,7 +152,19 @@ void CPU::loadXIndexWithImmediate(Memory &memory)
     m_xIndex = immediateValue;
 
     ostringstream verboseString;
-    verboseString << "Loading Accumulator with value 0x" << hex << int(immediateValue);
+    verboseString << "Loading X Index with value 0x" << hex << int(immediateValue);
+    printVerbose(verboseString.str());
+}
+
+void CPU::loadIndexYWithImmediate(Memory &memory)
+{
+    uint8_t immediateValue = memory.read8(m_programCounter);
+    m_programCounter += 1;
+
+    m_yIndex = immediateValue;
+
+    ostringstream verboseString;
+    verboseString << "Loading Y Index with value 0x" << hex << int(immediateValue);
     printVerbose(verboseString.str());
 }
 
@@ -209,19 +237,22 @@ void CPU::opcodeDebugOutput(uint8_t opcode)
         opcodeDebugString = "<SIE> Set Interrupt Disable";
         break;
     case Opcode::JUMP_ABSOLUTE:
-        opcodeDebugString = "<JMP abs> Jump Absolute";
+        opcodeDebugString = "<JMP abs> - Jump Absolute";
         break;
     case Opcode::STORE_ACCUMULATOR_AT_ABSOLUTE:
-        opcodeDebugString = "<STA abs> Store Accumulator At Absolute Address";
+        opcodeDebugString = "<STA abs> - Store Accumulator At Absolute Address";
         break;
     case Opcode::LOAD_ACCUMULATOR_WITH_IMMEDIATE:
-        opcodeDebugString = "<LDA imm> Load Accumulator With Immediate Value";
+        opcodeDebugString = "<LDA imm> - Load Accumulator With Immediate Value";
         break;
     case Opcode::CLEAR_DECIMAL_MODE:
-        opcodeDebugString = "<CLD> Clear Decimal Mode";
+        opcodeDebugString = "<CLD> - Clear Decimal Mode";
         break;
     case Opcode::LOAD_INDEX_X_WITH_IMMEDIATE:
-        opcodeDebugString = "<LDC imm> - Load Index X With Immediate Value";
+        opcodeDebugString = "<LDX imm> - Load Index X With Immediate Value";
+        break;
+    case Opcode::LOAD_INDEX_Y_WITH_IMMEDIATE:
+        opcodeDebugString = "<LDY imm> - Load Index Y With Immediate Value";
         break;
     case Opcode::TRANSFER_INDEX_X_TO_STACK_POINTER:
         opcodeDebugString = "<TXS> - Transfer Index X To Stack Pointer";
@@ -230,10 +261,13 @@ void CPU::opcodeDebugOutput(uint8_t opcode)
         opcodeDebugString = "<INX> - Increment Index X";
         break;
     case Opcode::STORE_INDEX_X_AT_ABSOLUTE:
-        opcodeDebugString = "<STX abs> Store Index X At Absolute Address";
+        opcodeDebugString = "<STX abs> - Store Index X At Absolute Address";
         break;
     case Opcode::JUMP_ABSOLUTE_SAVE_RETURN:
-        opcodeDebugString = "<JSR abs> Jump Absolute Save Return Address";
+        opcodeDebugString = "<JSR abs> - Jump Absolute Save Return Address";
+        break;
+    case Opcode::STORE_INDEX_Y_AT_ZERO_PAGE:
+        opcodeDebugString = "<STY d> - Store Index Y At Zero Page Address";
         break;
     case Opcode::UNKNOWN_OPCODE:
     default:

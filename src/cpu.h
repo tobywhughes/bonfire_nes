@@ -20,10 +20,12 @@ enum Opcode
     STORE_ACCUMULATOR_AT_ABSOLUTE = 0x8D,
     STORE_INDEX_X_AT_ABSOLUTE = 0x8E,
     TRANSFER_INDEX_X_TO_STACK_POINTER = 0x9A,
+    LOAD_INDEX_Y_WITH_IMMEDIATE = 0xA0,
     LOAD_INDEX_X_WITH_IMMEDIATE = 0xA2,
     LOAD_ACCUMULATOR_WITH_IMMEDIATE = 0xA9,
     CLEAR_DECIMAL_MODE = 0xD8,
     INCREMENT_INDEX_X = 0xE8,
+    STORE_INDEX_Y_AT_ZERO_PAGE = 0x84,
     UNKNOWN_OPCODE,
 };
 
@@ -46,10 +48,12 @@ private:
     void storeAccumulatorAtAbsolute(Memory &memory);
     void loadAccumulatorWithImmediate(Memory &memory);
     void loadXIndexWithImmediate(Memory &memory);
+    void loadIndexYWithImmediate(Memory &memory);
     void transferIndexXToStackPointer();
     void incrementIndexX();
     void storeIndexXAtAbsolute(Memory &memory);
     void jumpAbsoluteSaveReturn(Memory &memory);
+    void storeIndexYAtZeroPage(Memory &memory);
 
 public:
     CPU();
