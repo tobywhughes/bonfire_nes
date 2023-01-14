@@ -58,6 +58,9 @@ void CPU::execute(Memory &memory)
     case Opcode::TRANSFER_INDEX_X_TO_STACK_POINTER:
         transferIndexXToStackPointer();
         break;
+    case Opcode::TRANSFER_ACCUMULATOR_TO_INDEX_X:
+        transferAccumulatorToIndexX();
+        break;
     case Opcode::INCREMENT_INDEX_X:
         incrementIndexX();
         break;
@@ -247,6 +250,18 @@ void CPU::transferIndexXToStackPointer()
     printVerbose(verboseString.str());
 }
 
+void CPU::transferAccumulatorToIndexX()
+{
+    m_xIndex = m_accumulator;
+
+    status_setNegative((m_xIndex & 0b10000000) != 0);
+    status_setZero(m_xIndex == 0);
+
+    ostringstream verboseString;
+    verboseString << "Loading Stack Pointer with value 0x" << hex << int(m_xIndex);
+    printVerbose(verboseString.str());
+}
+
 void CPU::incrementIndexX()
 {
     m_xIndex += 1;
@@ -396,6 +411,9 @@ void CPU::opcodeDebugOutput(uint8_t opcode)
         break;
     case Opcode::TRANSFER_INDEX_X_TO_STACK_POINTER:
         opcodeDebugString = "<TXS> - Transfer Index X To Stack Pointer";
+        break;
+    case Opcode::TRANSFER_ACCUMULATOR_TO_INDEX_X:
+        opcodeDebugString = "<TAX> - Transfer Accumulator To Index X";
         break;
     case Opcode::INCREMENT_INDEX_X:
         opcodeDebugString = "<INX> - Increment Index X";

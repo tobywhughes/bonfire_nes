@@ -26,6 +26,7 @@ enum Opcode
     LOAD_INDEX_Y_WITH_IMMEDIATE = 0xA0,
     LOAD_INDEX_X_WITH_IMMEDIATE = 0xA2,
     LOAD_ACCUMULATOR_WITH_IMMEDIATE = 0xA9,
+    TRANSFER_ACCUMULATOR_TO_INDEX_X = 0xAA,
     INCREMENT_INDEX_Y = 0xC8,
     BRANCH_ON_ZERO_CLEAR = 0xD0,
     CLEAR_DECIMAL_MODE = 0xD8,
@@ -71,6 +72,7 @@ private:
     void loadXIndexWithImmediate(Memory &memory);
     void loadIndexYWithImmediate(Memory &memory);
     void transferIndexXToStackPointer();
+    void transferAccumulatorToIndexX();
     void incrementIndexX();
     void storeIndexXAtAbsolute(Memory &memory);
     void jumpAbsoluteSaveReturn(Memory &memory);
