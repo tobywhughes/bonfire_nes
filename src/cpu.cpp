@@ -60,6 +60,9 @@ void CPU::execute(Memory &memory)
     case Opcode::INCREMENT_INDEX_X:
         incrementIndexX();
         break;
+    case Opcode::INCREMENT_INDEX_Y:
+        incrementIndexY();
+        break;
     case Opcode::STORE_INDEX_X_AT_ABSOLUTE:
         storeIndexXAtAbsolute(memory);
         break;
@@ -233,7 +236,16 @@ void CPU::incrementIndexX()
     m_xIndex += 1;
 
     ostringstream verboseString;
-    verboseString << "Index X  incremented with value 0x" << hex << int(m_xIndex);
+    verboseString << "Index X  incremented to value 0x" << hex << int(m_xIndex);
+    printVerbose(verboseString.str());
+}
+
+void CPU::incrementIndexY()
+{
+    m_yIndex += 1;
+
+    ostringstream verboseString;
+    verboseString << "Index Y  incremented to value 0x" << hex << int(m_yIndex);
     printVerbose(verboseString.str());
 }
 
@@ -301,6 +313,9 @@ void CPU::opcodeDebugOutput(uint8_t opcode)
         break;
     case Opcode::INCREMENT_INDEX_X:
         opcodeDebugString = "<INX> - Increment Index X";
+        break;
+    case Opcode::INCREMENT_INDEX_Y:
+        opcodeDebugString = "<INY> - Increment Index Y";
         break;
     case Opcode::STORE_INDEX_X_AT_ABSOLUTE:
         opcodeDebugString = "<STX abs> - Store Index X At Absolute Address";

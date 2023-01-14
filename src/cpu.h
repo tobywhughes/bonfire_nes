@@ -28,6 +28,7 @@ enum Opcode
     STORE_INDEX_Y_AT_ZERO_PAGE = 0x84,
     STORE_INDEX_X_AT_ZERO_PAGE = 0x86,
     STORE_ACCUMULATOR_AT_INDIRECT_Y_INDEXED = 0x91,
+    INCREMENT_INDEX_Y = 0xC8,
     UNKNOWN_OPCODE,
 };
 
@@ -58,6 +59,7 @@ private:
     void storeIndexYAtZeroPage(Memory &memory);
     void storeIndexXAtZeroPage(Memory &memory);
     void storeAccumulatorAtIndirectYIndexed(Memory &memory);
+    void incrementIndexY();
 
 public:
     CPU();
