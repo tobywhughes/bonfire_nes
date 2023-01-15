@@ -19,6 +19,7 @@ private:
 public:
     PPU();
     void writeRegister(uint16_t address, uint8_t value);
+    uint8_t readRegister(uint16_t address);
 };
 
 #endif

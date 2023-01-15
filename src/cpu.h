@@ -65,6 +65,7 @@ private:
     void branchOnZeroClear(Memory &memory);
     void incrementZeroPagedAddress(Memory &memory);
     void returnFromSubroutine(Memory &memory);
+    void absoluteBitwiseTest(Memory &memory);
 
 public:
     CPU();

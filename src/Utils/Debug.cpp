@@ -80,6 +80,9 @@ void Debug::opcodeDebugOutput(uint8_t opcode, uint16_t programCounter, bool prin
     case Opcode::RETURN_FROM_SUBROUTINE:
         opcodeDebugString = "<RTS> - Return From Subroutine";
         break;
+    case Opcode::ABSOLUTE_BITWISE_TEST:
+        opcodeDebugString = "<BIT abs> - Absolute Bitwise Test";
+        break;
     case Opcode::UNKNOWN_OPCODE:
     default:
         opcodeDebugString = "Unknown Opcode";

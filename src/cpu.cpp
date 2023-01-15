@@ -104,6 +104,9 @@ void CPU::execute(Memory &memory, unsigned long int opcodesExecuted)
     case Opcode::RETURN_FROM_SUBROUTINE:
         returnFromSubroutine(memory);
         break;
+    case Opcode::ABSOLUTE_BITWISE_TEST:
+        absoluteBitwiseTest(memory);
+        break;
     case Opcode::UNKNOWN_OPCODE:
     default:
         cout << T_ERROR << "Unimplemented Opcode: 0x" << hex << (int)opcode << endl;
@@ -455,6 +458,23 @@ void CPU::returnFromSubroutine(Memory &memory)
 
     ostringstream verboseString;
     verboseString << "Returned from subroutine to address {0x" << hex << int(m_programCounter) << "}" << endl;
+    printVerbose(verboseString.str());
+}
+
+void CPU::absoluteBitwiseTest(Memory &memory)
+{
+    uint16_t absoluteAddress = memory.read16(m_programCounter);
+    m_programCounter += 2;
+
+    uint8_t memoryValue = memory.read8(absoluteAddress);
+    uint8_t resultValue = memoryValue & m_accumulator;
+
+    status_setZero(resultValue == 0);
+    status_setNegative((resultValue & 0b10000000) != 0);
+    status_setOverflow((resultValue & 0b01000000) != 0);
+
+    ostringstream verboseString;
+    verboseString << "Bitwise Test with value 0x" << hex << int(resultValue) << " set status register to 0b" << bitset<8>(m_statusRegister) << endl;
     printVerbose(verboseString.str());
 }
 

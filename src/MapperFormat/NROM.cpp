@@ -10,7 +10,13 @@ string NROM::getFormatName()
 
 ReadResult NROM::read(uint16_t address)
 {
-    if (address >= 0x8000)
+    if ((address >= 0x2000 && address <= 0x2007) || address == 0x4014)
+    {
+        return ReadResult{
+            ResultDestination::PPU_DATA,
+            address};
+    }
+    else if (address >= 0x8000)
     {
         return ReadResult{
             ResultDestination::PRG,
