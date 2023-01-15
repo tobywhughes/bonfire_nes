@@ -92,6 +92,9 @@ void CPU::execute(Memory &memory, unsigned long int opcodesExecuted)
     case Opcode::STORE_INDEX_Y_AT_ZERO_PAGE:
         storeIndexYAtZeroPage(memory);
         break;
+    case Opcode::STORE_ACCUMULATOR_AT_ZERO_PAGE:
+        storeAccumulatorAtZeroPage(memory);
+        break;
     case Opcode::STORE_INDEX_X_AT_ZERO_PAGE:
         storeIndexXAtZeroPage(memory);
         break;
@@ -121,6 +124,12 @@ void CPU::execute(Memory &memory, unsigned long int opcodesExecuted)
         break;
     case Opcode::OR_MEMORY_WITH_ACCUMULATOR_ABSOLUTE:
         orMemoryWithAccumulatorAbsolute(memory);
+        break;
+    case Opcode::PUSH_ACCUMULATOR_TO_STACK:
+        pushAccumulatorToStack(memory);
+        break;
+    case Opcode::PULL_ACCUMULATOR_FROM_STACK:
+        pullAccumulatorFromStack(memory);
         break;
     case Opcode::UNKNOWN_OPCODE:
     default:
@@ -240,6 +249,20 @@ void CPU::storeIndexXAtZeroPage(Memory &memory)
 
     ostringstream verboseString;
     verboseString << "Storing Index X value 0x" << hex << int(m_xIndex) << " at zero page address {0x" << hex << int(zeroPagedAddress) << "}";
+    printVerbose(verboseString.str());
+}
+
+void CPU::storeAccumulatorAtZeroPage(Memory &memory)
+{
+    uint8_t address = memory.read8(m_programCounter);
+    m_programCounter += 1;
+
+    uint16_t zeroPagedAddress = 0x0000 | address;
+
+    memory.write8(zeroPagedAddress, m_accumulator);
+
+    ostringstream verboseString;
+    verboseString << "Storing Index X value 0x" << hex << int(m_accumulator) << " at zero page address {0x" << hex << int(zeroPagedAddress) << "}";
     printVerbose(verboseString.str());
 }
 
@@ -601,6 +624,33 @@ void CPU::orMemoryWithAccumulatorAbsolute(Memory &memory)
 
     ostringstream verboseString;
     verboseString << "OR with value 0x" << hex << int(memoryValue) << " at address {0x" << hex << int(absoluteAddress) << "} and accumulator value 0x" << hex << int(m_accumulator) << " set status register to 0b" << bitset<8>(m_statusRegister) << endl;
+    printVerbose(verboseString.str());
+}
+
+void CPU::pushAccumulatorToStack(Memory &memory)
+{
+    memory.write8(m_stackPointer + 0x100, m_accumulator);
+    m_stackPointer -= 1;
+
+    ostringstream verboseString;
+    verboseString << "Pushed accumulator value 0x" << hex << int(m_accumulator) << " to stack" << endl;
+    verboseString << T_DEBUG << "New Stack Pointer value: 0x" << hex << (int)m_stackPointer;
+    printVerbose(verboseString.str());
+}
+
+void CPU::pullAccumulatorFromStack(Memory &memory)
+{
+    m_stackPointer += 1;
+    uint8_t pulledValue = memory.read8(m_stackPointer + 0x100);
+
+    m_accumulator = pulledValue;
+
+    status_setZero(m_accumulator == 0);
+    status_setNegative((m_accumulator & 0b10000000) != 0);
+
+    ostringstream verboseString;
+    verboseString << "Pulled accumulator value 0x" << hex << int(m_accumulator) << " from stack" << endl;
+    verboseString << T_DEBUG << "New Stack Pointer value: 0x" << hex << (int)m_stackPointer;
     printVerbose(verboseString.str());
 }
 

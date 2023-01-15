@@ -61,6 +61,7 @@ private:
     void jumpAbsoluteSaveReturn(Memory &memory);
     void storeIndexYAtZeroPage(Memory &memory);
     void storeIndexXAtZeroPage(Memory &memory);
+    void storeAccumulatorAtZeroPage(Memory &memory);
     void storeAccumulatorAtIndirectYIndexed(Memory &memory);
     void storeAccumulatorAtZeroPageXIndex(Memory &memory);
     void incrementIndexY();
@@ -71,6 +72,8 @@ private:
     void returnFromSubroutine(Memory &memory);
     void absoluteBitwiseTest(Memory &memory);
     void orMemoryWithAccumulatorAbsolute(Memory &memory);
+    void pushAccumulatorToStack(Memory &memory);
+    void pullAccumulatorFromStack(Memory &memory);
 
 public:
     CPU();

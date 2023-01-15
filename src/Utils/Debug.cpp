@@ -68,6 +68,9 @@ void Debug::opcodeDebugOutput(uint8_t opcode, uint16_t programCounter, bool prin
     case Opcode::STORE_INDEX_Y_AT_ZERO_PAGE:
         opcodeDebugString = "<STY d> - Store Index Y At Zero Page Address";
         break;
+    case Opcode::STORE_ACCUMULATOR_AT_ZERO_PAGE:
+        opcodeDebugString = "<STA d> - Store Accumulator At Zero Page Address";
+        break;
     case Opcode::STORE_INDEX_X_AT_ZERO_PAGE:
         opcodeDebugString = "<STX d> - Store Index X At Zero Page Address";
         break;
@@ -97,6 +100,12 @@ void Debug::opcodeDebugOutput(uint8_t opcode, uint16_t programCounter, bool prin
         break;
     case Opcode::OR_MEMORY_WITH_ACCUMULATOR_ABSOLUTE:
         opcodeDebugString = "<ORA abs> - Or absolute memory with accumulator";
+        break;
+    case Opcode::PUSH_ACCUMULATOR_TO_STACK:
+        opcodeDebugString = "<PHA> - Push Accumulator To Stack";
+        break;
+    case Opcode::PULL_ACCUMULATOR_FROM_STACK:
+        opcodeDebugString = "<PLA> - Pull Accumulator From Stack";
         break;
     case Opcode::UNKNOWN_OPCODE:
     default:
