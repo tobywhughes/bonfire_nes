@@ -8,7 +8,7 @@ using namespace std;
 
 const bool PRINT_OPCODE_DEBUG = true;
 const bool PRINT_STATUS_DEBUG = false;
-const bool PRINT_VERBOSE_OPCODE_DEBUG = PRINT_OPCODE_DEBUG && true;
+const bool PRINT_VERBOSE_OPCODE_DEBUG = PRINT_OPCODE_DEBUG && false;
 
 CPU::CPU()
 {
@@ -25,7 +25,7 @@ void CPU::initialize(Memory &memory)
     cout << T_DEBUG << "PC Initialized To: 0x" << hex << (int)m_programCounter << endl;
 }
 
-void CPU::execute(Memory &memory)
+void CPU::execute(Memory &memory, unsigned long int opcodesExecuted)
 {
     uint16_t opcode = memory.read8(m_programCounter);
     opcodeDebugOutput(opcode);
@@ -42,6 +42,9 @@ void CPU::execute(Memory &memory)
         break;
     case Opcode::STORE_ACCUMULATOR_AT_ABSOLUTE:
         storeAccumulatorAtAbsolute(memory);
+        break;
+    case Opcode::STORE_ACCUMULATOR_AT_ABSOLUTE_X_INDEXED:
+        storeAccumulatorAtAbsoluteXIndexed(memory);
         break;
     case Opcode::LOAD_ACCUMULATOR_WITH_IMMEDIATE:
         loadAccumulatorWithImmediate(memory);
@@ -61,8 +64,14 @@ void CPU::execute(Memory &memory)
     case Opcode::TRANSFER_ACCUMULATOR_TO_INDEX_X:
         transferAccumulatorToIndexX();
         break;
+    case Opcode::TRANSFER_STACK_POINTER_TO_INDEX_X:
+        transferStackPointerToIndexX();
+        break;
     case Opcode::INCREMENT_INDEX_X:
         incrementIndexX();
+        break;
+    case Opcode::DECREMENT_INDEX_X:
+        decrementIndexX();
         break;
     case Opcode::INCREMENT_INDEX_Y:
         incrementIndexY();
@@ -82,15 +91,22 @@ void CPU::execute(Memory &memory)
     case Opcode::STORE_ACCUMULATOR_AT_INDIRECT_Y_INDEXED:
         storeAccumulatorAtIndirectYIndexed(memory);
         break;
+    case Opcode::STORE_ACCUMULATOR_AT_ZEROPAGE_X_INDEXED:
+        storeAccumulatorAtZeroPageXIndex(memory);
+        break;
     case Opcode::BRANCH_ON_ZERO_CLEAR:
         branchOnZeroClear(memory);
         break;
     case Opcode::INCREMENT_ZERO_PAGED_ADDRESS:
         incrementZeroPagedAddress(memory);
         break;
+    case Opcode::RETURN_FROM_SUBROUTINE:
+        returnFromSubroutine(memory);
+        break;
     case Opcode::UNKNOWN_OPCODE:
     default:
         cout << T_ERROR << "Unimplemented Opcode: 0x" << hex << (int)opcode << endl;
+        cout << T_DEBUG << "Opcodes Executed - " << dec << opcodesExecuted << endl;
         cout << T_ERROR << "Exiting Program" << endl;
         exit(0);
         break;
@@ -121,6 +137,21 @@ void CPU::storeAccumulatorAtAbsolute(Memory &memory)
 {
     uint16_t absoluteAddress = memory.read16(m_programCounter);
     m_programCounter += 2;
+
+    memory.write8(absoluteAddress, m_accumulator);
+
+    ostringstream verboseString;
+    verboseString << "Storing Accumulator value 0x" << hex << int(m_accumulator) << " at address {0x" << hex << int(absoluteAddress) << "}";
+    printVerbose(verboseString.str());
+}
+
+void CPU::storeAccumulatorAtAbsoluteXIndexed(Memory &memory)
+{
+    uint16_t absoluteAddress = memory.read16(m_programCounter);
+
+    m_programCounter += 2;
+
+    absoluteAddress += m_xIndex;
 
     memory.write8(absoluteAddress, m_accumulator);
 
@@ -162,6 +193,20 @@ void CPU::storeAccumulatorAtIndirectYIndexed(Memory &memory)
 
     ostringstream verboseString;
     verboseString << "Storing Accumulator value 0x" << hex << int(m_accumulator) << " at address {0x" << hex << int(lookupValue) << "}";
+    printVerbose(verboseString.str());
+}
+
+void CPU::storeAccumulatorAtZeroPageXIndex(Memory &memory)
+{
+    uint8_t operand = memory.read8(m_programCounter);
+    m_programCounter += 1;
+
+    operand += m_xIndex;
+
+    memory.write8((uint16_t)operand, m_accumulator);
+
+    ostringstream verboseString;
+    verboseString << "Storing Accumulator value 0x" << hex << int(m_accumulator) << " at address {0x" << hex << int((uint16_t)operand) << "}";
     printVerbose(verboseString.str());
 }
 
@@ -262,7 +307,19 @@ void CPU::transferAccumulatorToIndexX()
     status_setZero(m_xIndex == 0);
 
     ostringstream verboseString;
-    verboseString << "Loading Stack Pointer with value 0x" << hex << int(m_xIndex);
+    verboseString << "Loading Accumulator with value 0x" << hex << int(m_xIndex);
+    printVerbose(verboseString.str());
+}
+
+void CPU::transferStackPointerToIndexX()
+{
+    m_xIndex = m_stackPointer;
+
+    status_setNegative((m_xIndex & 0b10000000) != 0);
+    status_setZero(m_xIndex == 0);
+
+    ostringstream verboseString;
+    verboseString << "Loading Index X with value 0x" << hex << int(m_xIndex);
     printVerbose(verboseString.str());
 }
 
@@ -275,6 +332,18 @@ void CPU::incrementIndexX()
 
     ostringstream verboseString;
     verboseString << "Index X incremented to value 0x" << hex << int(m_xIndex);
+    printVerbose(verboseString.str());
+}
+
+void CPU::decrementIndexX()
+{
+    m_xIndex -= 1;
+
+    status_setNegative((m_xIndex & 0b10000000) != 0);
+    status_setZero(m_xIndex == 0);
+
+    ostringstream verboseString;
+    verboseString << "Index X decremented to value 0x" << hex << int(m_xIndex);
     printVerbose(verboseString.str());
 }
 
@@ -323,7 +392,7 @@ void CPU::jumpAbsoluteSaveReturn(Memory &memory)
 
     memory.write8(stackOffset + m_stackPointer, programCounterHigh);
     m_stackPointer -= 1;
-    memory.write8(stackOffset + m_stackPointer, programCounterHigh);
+    memory.write8(stackOffset + m_stackPointer, programCounterLow);
     m_stackPointer -= 1;
 
     m_programCounter = absoluteAddress;
@@ -372,6 +441,22 @@ void CPU::branchOnZeroClear(Memory &memory)
     printVerbose(verboseString.str());
 }
 
+void CPU::returnFromSubroutine(Memory &memory)
+{
+    uint16_t stackOffset = 0x100;
+    stackOffset += m_stackPointer + 1;
+
+    uint16_t returnAddress = memory.read16(stackOffset);
+
+    m_stackPointer += 2;
+
+    m_programCounter = returnAddress;
+
+    ostringstream verboseString;
+    verboseString << "Returned from subroutine to address {0x" << hex << int(m_programCounter) << "}" << endl;
+    printVerbose(verboseString.str());
+}
+
 void CPU::printVerbose(string verboseString)
 {
     if (PRINT_VERBOSE_OPCODE_DEBUG)
@@ -401,6 +486,9 @@ void CPU::opcodeDebugOutput(uint8_t opcode)
     case Opcode::STORE_ACCUMULATOR_AT_ABSOLUTE:
         opcodeDebugString = "<STA abs> - Store Accumulator At Absolute Address";
         break;
+    case Opcode::STORE_ACCUMULATOR_AT_ABSOLUTE_X_INDEXED:
+        opcodeDebugString = "<STA abs,X> - Store Accumulator At Absolute Address X-Indexed";
+        break;
     case Opcode::LOAD_ACCUMULATOR_WITH_IMMEDIATE:
         opcodeDebugString = "<LDA imm> - Load Accumulator With Immediate Value";
         break;
@@ -419,8 +507,14 @@ void CPU::opcodeDebugOutput(uint8_t opcode)
     case Opcode::TRANSFER_ACCUMULATOR_TO_INDEX_X:
         opcodeDebugString = "<TAX> - Transfer Accumulator To Index X";
         break;
+    case Opcode::TRANSFER_STACK_POINTER_TO_INDEX_X:
+        opcodeDebugString = "<TSX> - Transfer Stack Pointer To Index X";
+        break;
     case Opcode::INCREMENT_INDEX_X:
         opcodeDebugString = "<INX> - Increment Index X";
+        break;
+    case Opcode::DECREMENT_INDEX_X:
+        opcodeDebugString = "<DEX> - Decrement Index X";
         break;
     case Opcode::INCREMENT_INDEX_Y:
         opcodeDebugString = "<INY> - Increment Index Y";
@@ -440,11 +534,17 @@ void CPU::opcodeDebugOutput(uint8_t opcode)
     case Opcode::STORE_ACCUMULATOR_AT_INDIRECT_Y_INDEXED:
         opcodeDebugString = "<STA (d),y> - Store Accumulator At indirect y-indexed";
         break;
+    case Opcode::STORE_ACCUMULATOR_AT_ZEROPAGE_X_INDEXED:
+        opcodeDebugString = "<STA d,x> - Store Accumulator At zero page x-indexed";
+        break;
     case Opcode::BRANCH_ON_ZERO_CLEAR:
         opcodeDebugString = "<BNE rel> - Branch On Zero Clear";
         break;
     case Opcode::INCREMENT_ZERO_PAGED_ADDRESS:
         opcodeDebugString = "<INC d> - Increment Zero Paged Address";
+        break;
+    case Opcode::RETURN_FROM_SUBROUTINE:
+        opcodeDebugString = "<RTS> - Return From Subroutine";
         break;
     case Opcode::UNKNOWN_OPCODE:
     default:
