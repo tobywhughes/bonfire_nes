@@ -9,7 +9,7 @@ using namespace std;
 
 const bool PRINT_OPCODE_DEBUG = true;
 const bool PRINT_STATUS_DEBUG = false;
-const bool PRINT_VERBOSE_OPCODE_DEBUG = PRINT_OPCODE_DEBUG && true;
+const bool PRINT_VERBOSE_OPCODE_DEBUG = PRINT_OPCODE_DEBUG && false;
 
 CPU::CPU()
 {
@@ -64,6 +64,9 @@ void CPU::execute(Memory &memory, unsigned long int opcodesExecuted)
         break;
     case Opcode::TRANSFER_ACCUMULATOR_TO_INDEX_X:
         transferAccumulatorToIndexX();
+        break;
+    case Opcode::TRANSFER_ACCUMULATOR_TO_INDEX_Y:
+        transferAccumulatorToIndexY();
         break;
     case Opcode::TRANSFER_STACK_POINTER_TO_INDEX_X:
         transferStackPointerToIndexX();
@@ -130,6 +133,9 @@ void CPU::execute(Memory &memory, unsigned long int opcodesExecuted)
         break;
     case Opcode::PULL_ACCUMULATOR_FROM_STACK:
         pullAccumulatorFromStack(memory);
+        break;
+    case Opcode::PULL_STATUS_FROM_STACK:
+        pullStatusFromStack(memory);
         break;
     case Opcode::UNKNOWN_OPCODE:
     default:
@@ -349,7 +355,19 @@ void CPU::transferAccumulatorToIndexX()
     status_setZero(m_xIndex == 0);
 
     ostringstream verboseString;
-    verboseString << "Loading Accumulator with value 0x" << hex << int(m_xIndex);
+    verboseString << "Loading Index X with value 0x" << hex << int(m_xIndex);
+    printVerbose(verboseString.str());
+}
+
+void CPU::transferAccumulatorToIndexY()
+{
+    m_yIndex = m_accumulator;
+
+    status_setNegative((m_yIndex & 0b10000000) != 0);
+    status_setZero(m_yIndex == 0);
+
+    ostringstream verboseString;
+    verboseString << "Loading Index Y with value 0x" << hex << int(m_yIndex);
     printVerbose(verboseString.str());
 }
 
@@ -649,6 +667,19 @@ void CPU::pullAccumulatorFromStack(Memory &memory)
 
     status_setZero(m_accumulator == 0);
     status_setNegative((m_accumulator & 0b10000000) != 0);
+
+    ostringstream verboseString;
+    verboseString << "Pulled accumulator value 0x" << hex << int(m_accumulator) << " from stack" << endl;
+    verboseString << T_DEBUG << "New Stack Pointer value: 0x" << hex << (int)m_stackPointer;
+    printVerbose(verboseString.str());
+}
+
+void CPU::pullStatusFromStack(Memory &memory)
+{
+    m_stackPointer += 1;
+    uint8_t pulledValue = memory.read8(m_stackPointer + 0x100);
+
+    m_statusRegister = pulledValue;
 
     ostringstream verboseString;
     verboseString << "Pulled accumulator value 0x" << hex << int(m_accumulator) << " from stack" << endl;

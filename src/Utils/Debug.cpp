@@ -41,6 +41,9 @@ void Debug::opcodeDebugOutput(uint8_t opcode, uint16_t programCounter, bool prin
     case Opcode::TRANSFER_ACCUMULATOR_TO_INDEX_X:
         opcodeDebugString = "<TAX> - Transfer Accumulator To Index X";
         break;
+    case Opcode::TRANSFER_ACCUMULATOR_TO_INDEX_Y:
+        opcodeDebugString = "<TAY> - Transfer Accumulator To Index Y";
+        break;
     case Opcode::TRANSFER_STACK_POINTER_TO_INDEX_X:
         opcodeDebugString = "<TSX> - Transfer Stack Pointer To Index X";
         break;
@@ -106,6 +109,9 @@ void Debug::opcodeDebugOutput(uint8_t opcode, uint16_t programCounter, bool prin
         break;
     case Opcode::PULL_ACCUMULATOR_FROM_STACK:
         opcodeDebugString = "<PLA> - Pull Accumulator From Stack";
+        break;
+    case Opcode::PULL_STATUS_FROM_STACK:
+        opcodeDebugString = "<PLP> - Pull Status From Stack";
         break;
     case Opcode::UNKNOWN_OPCODE:
     default:

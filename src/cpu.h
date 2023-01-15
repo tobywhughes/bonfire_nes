@@ -52,6 +52,7 @@ private:
     void loadIndexYWithImmediate(Memory &memory);
     void transferIndexXToStackPointer();
     void transferAccumulatorToIndexX();
+    void transferAccumulatorToIndexY();
     void transferStackPointerToIndexX();
     void transferIndexYToAccumulator();
     void incrementIndexX();
@@ -74,6 +75,7 @@ private:
     void orMemoryWithAccumulatorAbsolute(Memory &memory);
     void pushAccumulatorToStack(Memory &memory);
     void pullAccumulatorFromStack(Memory &memory);
+    void pullStatusFromStack(Memory &memory);
 
 public:
     CPU();

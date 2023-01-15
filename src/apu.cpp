@@ -45,10 +45,10 @@ void APU::writeRegister(uint16_t address, uint8_t value)
     case 0x4015:
         APU_STATUS = value;
         break;
-    case 0x4016:
+    case 0x4017:
         APU_FRAME_COUNTER = value;
         break;
     default:
-        cout << T_WARNING << "Address {0x" << hex << (int)address << "} not mapped to APU - Mapper Error";
+        cout << T_WARNING << "Address {0x" << hex << (int)address << "} not mapped to APU - Mapper Error" << endl;
     }
 }
