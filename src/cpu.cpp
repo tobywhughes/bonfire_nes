@@ -7,7 +7,7 @@
 
 using namespace std;
 
-const bool PRINT_OPCODE_DEBUG = true;
+const bool PRINT_OPCODE_DEBUG = false;
 const bool PRINT_STATUS_DEBUG = false;
 const bool PRINT_VERBOSE_OPCODE_DEBUG = PRINT_OPCODE_DEBUG && false;
 
@@ -118,6 +118,9 @@ void CPU::execute(Memory &memory, unsigned long int opcodesExecuted)
         break;
     case Opcode::ABSOLUTE_BITWISE_TEST:
         absoluteBitwiseTest(memory);
+        break;
+    case Opcode::OR_MEMORY_WITH_ACCUMULATOR_ABSOLUTE:
+        orMemoryWithAccumulatorAbsolute(memory);
         break;
     case Opcode::UNKNOWN_OPCODE:
     default:
@@ -582,6 +585,22 @@ void CPU::absoluteBitwiseTest(Memory &memory)
 
     ostringstream verboseString;
     verboseString << "Bitwise Test with value 0x" << hex << int(resultValue) << " set status register to 0b" << bitset<8>(m_statusRegister) << endl;
+    printVerbose(verboseString.str());
+}
+
+void CPU::orMemoryWithAccumulatorAbsolute(Memory &memory)
+{
+    uint16_t absoluteAddress = memory.read16(m_programCounter);
+    m_programCounter += 2;
+
+    uint8_t memoryValue = memory.read8(absoluteAddress);
+    uint8_t resultValue = memoryValue | m_accumulator;
+
+    status_setZero(resultValue == 0);
+    status_setNegative((resultValue & 0b10000000) != 0);
+
+    ostringstream verboseString;
+    verboseString << "OR with value 0x" << hex << int(memoryValue) << " at address {0x" << hex << int(absoluteAddress) << "} and accumulator value 0x" << hex << int(m_accumulator) << " set status register to 0b" << bitset<8>(m_statusRegister) << endl;
     printVerbose(verboseString.str());
 }
 

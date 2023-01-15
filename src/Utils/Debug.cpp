@@ -95,6 +95,9 @@ void Debug::opcodeDebugOutput(uint8_t opcode, uint16_t programCounter, bool prin
     case Opcode::ABSOLUTE_BITWISE_TEST:
         opcodeDebugString = "<BIT abs> - Absolute Bitwise Test";
         break;
+    case Opcode::OR_MEMORY_WITH_ACCUMULATOR_ABSOLUTE:
+        opcodeDebugString = "<ORA abs> - Or absolute memory with accumulator";
+        break;
     case Opcode::UNKNOWN_OPCODE:
     default:
         opcodeDebugString = "Unknown Opcode";

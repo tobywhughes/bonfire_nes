@@ -70,6 +70,7 @@ private:
     void incrementZeroPagedAddress(Memory &memory);
     void returnFromSubroutine(Memory &memory);
     void absoluteBitwiseTest(Memory &memory);
+    void orMemoryWithAccumulatorAbsolute(Memory &memory);
 
 public:
     CPU();
