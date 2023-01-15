@@ -666,6 +666,8 @@ void CPU::orMemoryWithAccumulatorAbsolute(Memory &memory)
     uint8_t memoryValue = memory.read8(absoluteAddress);
     uint8_t resultValue = memoryValue | m_accumulator;
 
+    m_accumulator = resultValue;
+
     status_setZero(resultValue == 0);
     status_setNegative((resultValue & 0b10000000) != 0);
 
