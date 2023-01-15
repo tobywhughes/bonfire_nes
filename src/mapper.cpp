@@ -68,7 +68,7 @@ uint16_t Mapper::read16(uint16_t address, vector<uint8_t> &prgRom, vector<uint8_
     }
 }
 
-void Mapper::write8(uint16_t address, uint8_t value, vector<uint8_t> &internalRam, PPU ppu, vector<uint8_t> &prgRam)
+void Mapper::write8(uint16_t address, uint8_t value, vector<uint8_t> &internalRam, PPU ppu, vector<uint8_t> &prgRam, APU apu)
 {
     if (address < 0x800)
     {
@@ -78,6 +78,11 @@ void Mapper::write8(uint16_t address, uint8_t value, vector<uint8_t> &internalRa
     {
         ppu.writeRegister(address, value);
     }
+    else if (address >= 0x4000 && address < 0x4020)
+    {
+        apu.writeRegister(address, value);
+    }
+
     // Temporary Implementation for NES Test Rom Functionality
     // NROM 0 this is mostly unused except in Family Basic
     // But NES Test Roms Use This To Write Results

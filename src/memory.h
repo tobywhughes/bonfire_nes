@@ -5,6 +5,7 @@
 #include "mapper.h"
 #include "ppu.h"
 #include "rom.h"
+#include "apu.h"
 
 class Memory
 {
@@ -12,6 +13,8 @@ private:
     Mapper m_mapper;
     Rom m_rom;
     PPU m_ppu;
+    APU m_apu;
+
     std::vector<uint8_t> m_internalRAM; // 2KB - 0x800
 
 public:

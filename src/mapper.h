@@ -8,6 +8,7 @@
 #include "MapperFormat/MapperFormat.h"
 #include "MapperFormat/NROM.h"
 #include "ppu.h"
+#include "apu.h"
 
 enum class MapperType : uint8_t
 {
@@ -26,7 +27,7 @@ public:
     void detectMapperNumber(uint8_t lowerFlag, uint8_t upperFlag, uint8_t prgRomSize);
     uint8_t read8(uint16_t address, std::vector<uint8_t> &prgRom, std::vector<uint8_t> &internalRam, PPU ppu);
     uint16_t read16(uint16_t address, std::vector<uint8_t> &prgRom, std::vector<uint8_t> &internalRam);
-    void write8(uint16_t address, uint8_t value, std::vector<uint8_t> &internalRam, PPU ppu, std::vector<uint8_t> &prgRam);
+    void write8(uint16_t address, uint8_t value, std::vector<uint8_t> &internalRam, PPU ppu, std::vector<uint8_t> &prgRam, APU apu);
 };
 
 #endif
