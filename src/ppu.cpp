@@ -6,6 +6,7 @@ using namespace std;
 
 PPU::PPU()
 {
+    PPU_STATUS = 0b10100000;
 }
 
 void PPU::writeRegister(uint16_t address, uint8_t value)
@@ -55,7 +56,7 @@ uint8_t PPU::readRegister(uint16_t address)
     case 0x2001:
         return PPU_MASK;
     case 0x2002:
-        return PPU_STATUS;
+        return PPU_STATUS; // temp test
     case 0x2003:
         return OAM_ADDR;
     case 0x2004:

@@ -7,9 +7,9 @@
 
 using namespace std;
 
-const bool PRINT_OPCODE_DEBUG = false;
+const bool PRINT_OPCODE_DEBUG = true;
 const bool PRINT_STATUS_DEBUG = false;
-const bool PRINT_VERBOSE_OPCODE_DEBUG = PRINT_OPCODE_DEBUG && false;
+const bool PRINT_VERBOSE_OPCODE_DEBUG = PRINT_OPCODE_DEBUG && true;
 
 CPU::CPU()
 {
@@ -590,7 +590,7 @@ void CPU::returnFromSubroutine(Memory &memory)
     m_programCounter = returnAddress;
 
     ostringstream verboseString;
-    verboseString << "Returned from subroutine to address {0x" << hex << int(m_programCounter) << "}" << endl;
+    verboseString << "Returned from subroutine to address {0x" << hex << int(m_programCounter) << "}";
     printVerbose(verboseString.str());
 }
 
@@ -602,12 +602,14 @@ void CPU::absoluteBitwiseTest(Memory &memory)
     uint8_t memoryValue = memory.read8(absoluteAddress);
     uint8_t resultValue = memoryValue & m_accumulator;
 
+    // Accumulator only affects zero flag
+    // Other to status flags are based on the value read from memory
     status_setZero(resultValue == 0);
-    status_setNegative((resultValue & 0b10000000) != 0);
-    status_setOverflow((resultValue & 0b01000000) != 0);
+    status_setNegative((memoryValue & 0b10000000) != 0);
+    status_setOverflow((memoryValue & 0b01000000) != 0);
 
     ostringstream verboseString;
-    verboseString << "Bitwise Test with value 0x" << hex << int(resultValue) << " set status register to 0b" << bitset<8>(m_statusRegister) << endl;
+    verboseString << "Bitwise Test with value 0x" << hex << int(resultValue) << " from absolute address {0x" << hex << int(absoluteAddress) << "} set status register to 0b" << bitset<8>(m_statusRegister);
     printVerbose(verboseString.str());
 }
 
