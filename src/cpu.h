@@ -43,8 +43,6 @@ private:
 
     // Opcode Handlers
     void setInterruptDisable();
-    void clearInterruptDisable();
-    void clearDecimalMode();
     void jumpAbsolute(Memory &memory);
     void printVerbose(std::string verboseString);
     void storeAccumulatorAtAbsolute(Memory &memory);
@@ -82,6 +80,7 @@ private:
 
     // Combined Handlers
     void branchOnStatusRegister(Memory &memory, uint8_t opcode);
+    void clearFlag(uint8_t opcode);
 
 public:
     CPU();

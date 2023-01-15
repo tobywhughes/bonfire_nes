@@ -39,7 +39,9 @@ void CPU::execute(Memory &memory, unsigned long int opcodesExecuted)
         setInterruptDisable();
         break;
     case Opcode::CLEAR_INTERRUPT_DISABLE:
-        clearInterruptDisable();
+    case Opcode::CLEAR_DECIMAL_MODE:
+    case Opcode::CLEAR_CARRY_FLAG:
+        clearFlag(opcode);
         break;
     case Opcode::JUMP_ABSOLUTE:
         jumpAbsolute(memory);
@@ -58,9 +60,6 @@ void CPU::execute(Memory &memory, unsigned long int opcodesExecuted)
         break;
     case Opcode::LOAD_INDEX_Y_WITH_IMMEDIATE:
         loadIndexYWithImmediate(memory);
-        break;
-    case Opcode::CLEAR_DECIMAL_MODE:
-        clearDecimalMode();
         break;
     case Opcode::TRANSFER_INDEX_X_TO_STACK_POINTER:
         transferIndexXToStackPointer();
@@ -166,15 +165,6 @@ void CPU::execute(Memory &memory, unsigned long int opcodesExecuted)
 void CPU::setInterruptDisable()
 {
     status_setInterrupt(true);
-
-    ostringstream verboseString;
-    verboseString << "Status Register Updated: 0b" << bitset<8>(m_statusRegister);
-    printVerbose(verboseString.str());
-}
-
-void CPU::clearInterruptDisable()
-{
-    status_setInterrupt(false);
 
     ostringstream verboseString;
     verboseString << "Status Register Updated: 0b" << bitset<8>(m_statusRegister);
@@ -354,9 +344,23 @@ void CPU::loadIndexYWithImmediate(Memory &memory)
     printVerbose(verboseString.str());
 }
 
-void CPU::clearDecimalMode()
+void CPU::clearFlag(uint8_t opcode)
 {
-    status_setDecimal(false);
+    switch (opcode)
+    {
+    case Opcode::CLEAR_CARRY_FLAG:
+        status_setCarry(false);
+        break;
+    case Opcode::CLEAR_DECIMAL_MODE:
+        status_setDecimal(false);
+        break;
+    case Opcode::CLEAR_INTERRUPT_DISABLE:
+        status_setInterrupt(false);
+        break;
+    default:
+        cout << T_ERROR << "Emulator Opcode Error - Branch Called On Invalid Opcode 0x" << hex << int(opcode) << endl;
+        exit(0);
+    }
 
     ostringstream verboseString;
     verboseString << "Status Register Updated: 0b" << bitset<8>(m_statusRegister);

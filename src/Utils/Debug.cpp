@@ -143,6 +143,9 @@ void Debug::opcodeDebugOutput(uint8_t opcode, uint16_t programCounter, bool prin
     case Opcode::SHIFT_RIGHT_ACCUMULATOR:
         opcodeDebugString = "<LSR A> - Shift Right Accumulator";
         break;
+    case Opcode::CLEAR_CARRY_FLAG:
+        opcodeDebugString = "<CLC> - Clear Carry Flag";
+        break;
     case Opcode::UNKNOWN_OPCODE:
     default:
         opcodeDebugString = "Unknown Opcode";
