@@ -48,8 +48,6 @@ private:
     void storeAccumulatorAtAbsolute(Memory &memory);
     void storeAccumulatorAtAbsoluteXIndexed(Memory &memory);
     void loadAccumulatorWithImmediate(Memory &memory);
-    void loadXIndexWithImmediate(Memory &memory);
-    void loadIndexYWithImmediate(Memory &memory);
     void transferIndexXToStackPointer();
     void transferAccumulatorToIndexX();
     void transferAccumulatorToIndexY();
@@ -79,10 +77,22 @@ private:
     void addImmediateWithBorrow(Memory &memory);
     void shiftRightAccumulator();
     void loadAccumulatorWithZeroPage(Memory &memory);
+    void andAccumulatorWithImmediate(Memory &memory);
 
     // Combined Handlers
     void branchOnStatusRegister(Memory &memory, uint8_t opcode);
     void clearFlag(uint8_t opcode);
+    void loadIndexX(Memory &memory, uint8_t opcode);
+    void loadIndexY(Memory &memory, uint8_t opcode);
+
+    // Memory Helpers
+    uint8_t getAbsolute(Memory &memory);
+    uint8_t getAbsoluteYIndexed(Memory &memory);
+    uint8_t getAbsoluteXIndexed(Memory &memory);
+    uint8_t getImmediate(Memory &memory);
+    uint8_t getZeroPage(Memory &memory);
+    uint8_t getZeroPageXIndexed(Memory &memory);
+    uint8_t getZeroPageYIndexed(Memory &memory);
 
 public:
     CPU();

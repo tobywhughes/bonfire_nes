@@ -60,12 +60,6 @@ void CPU::execute(Memory &memory, unsigned long int opcodesExecuted)
     case Opcode::LOAD_ACCUMULATOR_WITH_IMMEDIATE:
         loadAccumulatorWithImmediate(memory);
         break;
-    case Opcode::LOAD_INDEX_X_WITH_IMMEDIATE:
-        loadXIndexWithImmediate(memory);
-        break;
-    case Opcode::LOAD_INDEX_Y_WITH_IMMEDIATE:
-        loadIndexYWithImmediate(memory);
-        break;
     case Opcode::TRANSFER_INDEX_X_TO_STACK_POINTER:
         transferIndexXToStackPointer();
         break;
@@ -162,6 +156,23 @@ void CPU::execute(Memory &memory, unsigned long int opcodesExecuted)
         break;
     case Opcode::LOAD_ACCUMULATOR_WITH_ZERO_PAGE:
         loadAccumulatorWithZeroPage(memory);
+        break;
+    case Opcode::AND_ACCUMULATOR_WITH_IMMEDIATE:
+        andAccumulatorWithImmediate(memory);
+        break;
+    case Opcode::LOAD_INDEX_X_WITH_ABSOLUTE:
+    case Opcode::LOAD_INDEX_X_WITH_IMMEDIATE:
+    case Opcode::LOAD_INDEX_X_WITH_ZERO_PAGE:
+    case Opcode::LOAD_INDEX_X_ZERO_PAGE_Y_INDEXED:
+    case Opcode::LOAD_INDEX_X_WITH_ABSOLUTE_Y_INDEXED:
+        loadIndexX(memory, opcode);
+        break;
+    case Opcode::LOAD_INDEX_Y_WITH_ABSOLUTE:
+    case Opcode::LOAD_INDEX_Y_WITH_IMMEDIATE:
+    case Opcode::LOAD_INDEX_Y_WITH_ZERO_PAGE:
+    case Opcode::LOAD_INDEX_Y_ZERO_PAGE_X_INDEXED:
+    case Opcode::LOAD_INDEX_Y_WITH_ABSOLUTE_X_INDEXED:
+        loadIndexY(memory, opcode);
         break;
     case Opcode::UNKNOWN_OPCODE:
     default:
@@ -327,12 +338,7 @@ void CPU::loadAccumulatorWithImmediate(Memory &memory)
 
 void CPU::loadAccumulatorWithZeroPage(Memory &memory)
 {
-    uint8_t zeroPageOffset = memory.read8(m_programCounter);
-    m_programCounter += 1;
-
-    uint16_t zeroPageAddress = 0x0000 | zeroPageOffset;
-
-    uint8_t result = memory.read8(zeroPageAddress);
+    uint8_t result = getZeroPage(memory);
 
     m_accumulator = result;
 
@@ -340,37 +346,81 @@ void CPU::loadAccumulatorWithZeroPage(Memory &memory)
     status_setZero(m_accumulator == 0);
 
     ostringstream verboseString;
-    verboseString << "Loading Accumulator with value 0x" << hex << int(result) << "from zero page address {0x" << hex << int(zeroPageAddress) << "}";
+    verboseString << "Loading Accumulator with value 0x" << hex << int(result);
     printVerbose(verboseString.str());
 }
 
-void CPU::loadXIndexWithImmediate(Memory &memory)
+void CPU::loadIndexX(Memory &memory, uint8_t opcode)
 {
-    uint8_t immediateValue = memory.read8(m_programCounter);
-    m_programCounter += 1;
+    uint8_t resultValue;
+    uint16_t absoluteAddress;
 
-    m_xIndex = immediateValue;
+    switch (opcode)
+    {
+    case Opcode::LOAD_INDEX_X_WITH_ABSOLUTE:
+        resultValue = getAbsolute(memory);
+        break;
+    case Opcode::LOAD_INDEX_X_WITH_IMMEDIATE:
+        resultValue = getImmediate(memory);
+        break;
+    case Opcode::LOAD_INDEX_X_WITH_ZERO_PAGE:
+        resultValue = getZeroPage(memory);
+        break;
+    case Opcode::LOAD_INDEX_X_ZERO_PAGE_Y_INDEXED:
+        resultValue = getZeroPageYIndexed(memory);
+        break;
+    case Opcode::LOAD_INDEX_X_WITH_ABSOLUTE_Y_INDEXED:
+        resultValue = getAbsoluteYIndexed(memory);
+        break;
+    default:
+        cout << T_ERROR << "Emulator Opcode Error - LDX Called Invalid Opcode 0x" << hex << int(opcode) << endl;
+        exit(0);
+    }
+
+    m_xIndex = resultValue;
 
     status_setNegative((m_xIndex & 0b10000000) != 0);
     status_setZero(m_xIndex == 0);
 
     ostringstream verboseString;
-    verboseString << "Loading X Index with value 0x" << hex << int(immediateValue);
+    verboseString << "Loading X Index with value 0x" << hex << int(resultValue);
     printVerbose(verboseString.str());
 }
 
-void CPU::loadIndexYWithImmediate(Memory &memory)
+void CPU::loadIndexY(Memory &memory, uint8_t opcode)
 {
-    uint8_t immediateValue = memory.read8(m_programCounter);
-    m_programCounter += 1;
+    uint8_t resultValue;
+    uint16_t absoluteAddress;
 
-    m_yIndex = immediateValue;
+    switch (opcode)
+    {
+    case Opcode::LOAD_INDEX_Y_WITH_ABSOLUTE:
+        resultValue = getAbsolute(memory);
+        break;
+    case Opcode::LOAD_INDEX_Y_WITH_IMMEDIATE:
+        resultValue = getImmediate(memory);
+        break;
+    case Opcode::LOAD_INDEX_Y_WITH_ZERO_PAGE:
+        resultValue = getZeroPage(memory);
+        break;
+    case Opcode::LOAD_INDEX_Y_ZERO_PAGE_X_INDEXED:
+        resultValue = getZeroPageXIndexed(memory);
+        break;
+    case Opcode::LOAD_INDEX_Y_WITH_ABSOLUTE_X_INDEXED:
+        resultValue = getAbsoluteXIndexed(memory);
+        break;
+    default:
+        cout << T_ERROR << "Emulator Opcode Error - LDY Called On Invalid Opcode 0x" << hex << int(opcode) << endl;
+        exit(0);
+    }
+
+    m_yIndex = resultValue;
 
     status_setNegative((m_yIndex & 0b10000000) != 0);
     status_setZero(m_yIndex == 0);
 
     ostringstream verboseString;
-    verboseString << "Loading Y Index with value 0x" << hex << int(immediateValue);
+    verboseString << "Loading Y Index with value 0x" << hex << int(resultValue);
     printVerbose(verboseString.str());
 }
 
@@ -388,7 +438,7 @@ void CPU::clearFlag(uint8_t opcode)
         status_setInterrupt(false);
         break;
     default:
-        cout << T_ERROR << "Emulator Opcode Error - Branch Called On Invalid Opcode 0x" << hex << int(opcode) << endl;
+        cout << T_ERROR << "Emulator Opcode Error - Clear Flag Called On Invalid Opcode 0x" << hex << int(opcode) << endl;
         exit(0);
     }
 
@@ -673,6 +723,23 @@ void CPU::orMemoryWithAccumulatorAbsolute(Memory &memory)
 
     ostringstream verboseString;
     verboseString << "OR with value 0x" << hex << int(memoryValue) << " at address {0x" << hex << int(absoluteAddress) << "} and accumulator value 0x" << hex << int(m_accumulator) << " set status register to 0b" << bitset<8>(m_statusRegister) << endl;
+    printVerbose(verboseString.str());
+}
+
+void CPU::andAccumulatorWithImmediate(Memory &memory)
+{
+    uint8_t immediateValue = memory.read8(m_programCounter);
+    m_programCounter += 1;
+
+    uint8_t resultValue = immediateValue | m_accumulator;
+
+    m_accumulator = resultValue;
+
+    status_setZero(resultValue == 0);
+    status_setNegative((resultValue & 0b10000000) != 0);
+
+    ostringstream verboseString;
+    verboseString << "AND with immediate value 0x" << hex << int(immediateValue) << " and accumulator value 0x" << hex << int(m_accumulator) << " set status register to 0b" << bitset<8>(m_statusRegister) << endl;
     printVerbose(verboseString.str());
 }
 
@@ -961,3 +1028,69 @@ bool CPU::status_getCarry()
 {
     return (m_statusRegister & 0b00000001) != 0;
 }
+
+uint8_t CPU::getAbsolute(Memory &memory)
+{
+    uint16_t absoluteAddress = memory.read16(m_programCounter);
+    m_programCounter += 2;
+    return memory.read8(absoluteAddress);
+}
+
+uint8_t CPU::getAbsoluteYIndexed(Memory &memory)
+{
+    uint16_t absoluteAddress = memory.read16(m_programCounter);
+    m_programCounter += 2;
+    return memory.read8(absoluteAddress + m_yIndex);
+}
+
+uint8_t CPU::getAbsoluteXIndexed(Memory &memory)
+{
+    uint16_t absoluteAddress = memory.read16(m_programCounter);
+    m_programCounter += 2;
+    return memory.read8(absoluteAddress + m_xIndex);
+}
+
+uint8_t CPU::getImmediate(Memory &memory)
+{
+    uint8_t immediateValue = memory.read8(m_programCounter);
+    m_programCounter += 1;
+    return immediateValue;
+}
+
+uint8_t CPU::getZeroPage(Memory &memory)
+{
+    uint8_t zeroPageOffset = getImmediate(memory);
+
+    uint16_t zeroPageAddress = 0x0000 | zeroPageOffset;
+
+    return memory.read8(zeroPageAddress);
+}
+
+uint8_t CPU::getZeroPageXIndexed(Memory &memory)
+{
+    uint8_t zeroPageOffset = getImmediate(memory);
+
+    zeroPageOffset += m_xIndex;
+
+    uint16_t zeroPageAddress = 0x0000 | zeroPageOffset;
+
+    return memory.read8(zeroPageAddress);
+}
+
+uint8_t CPU::getZeroPageYIndexed(Memory &memory)
+{
+    uint8_t zeroPageOffset = getImmediate(memory);
+
+    zeroPageOffset += m_yIndex;
+
+    uint16_t zeroPageAddress = 0x0000 | zeroPageOffset;
+
+    return memory.read8(zeroPageAddress);
+}
+
+// uint8_t operand = memory.read8(m_programCounter);
+// m_programCounter += 1;
+
+// operand += m_xIndex;
+
+// memory.write8((uint16_t)operand, m_accumulator);

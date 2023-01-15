@@ -32,12 +32,6 @@ void Debug::opcodeDebugOutput(uint8_t opcode, uint16_t programCounter, bool prin
     case Opcode::CLEAR_DECIMAL_MODE:
         opcodeDebugString = "<CLD> - Clear Decimal Mode";
         break;
-    case Opcode::LOAD_INDEX_X_WITH_IMMEDIATE:
-        opcodeDebugString = "<LDX imm> - Load Index X With Immediate Value";
-        break;
-    case Opcode::LOAD_INDEX_Y_WITH_IMMEDIATE:
-        opcodeDebugString = "<LDY imm> - Load Index Y With Immediate Value";
-        break;
     case Opcode::TRANSFER_INDEX_X_TO_STACK_POINTER:
         opcodeDebugString = "<TXS> - Transfer Index X To Stack Pointer";
         break;
@@ -151,6 +145,39 @@ void Debug::opcodeDebugOutput(uint8_t opcode, uint16_t programCounter, bool prin
         break;
     case Opcode::LOAD_ACCUMULATOR_WITH_ZERO_PAGE:
         opcodeDebugString = "<LDA zpg> - Load Accumulator With Zero Page";
+        break;
+    case Opcode::AND_ACCUMULATOR_WITH_IMMEDIATE:
+        opcodeDebugString = "<AND imm> - AND Accumulator With Immediate";
+        break;
+    case Opcode::LOAD_INDEX_X_WITH_ABSOLUTE:
+        opcodeDebugString = "<LDX abs> - Load Index X With Absolute";
+        break;
+    case Opcode::LOAD_INDEX_X_WITH_IMMEDIATE:
+        opcodeDebugString = "<LDX imm> - Load Index X With Immediate Value";
+        break;
+    case Opcode::LOAD_INDEX_X_WITH_ZERO_PAGE:
+        opcodeDebugString = "<LDX zpg> - Load Index X With Zero Page";
+        break;
+    case Opcode::LOAD_INDEX_X_ZERO_PAGE_Y_INDEXED:
+        opcodeDebugString = "<LDX zpg,y> - Load Index X With Zero Page Y Indexed";
+        break;
+    case Opcode::LOAD_INDEX_X_WITH_ABSOLUTE_Y_INDEXED:
+        opcodeDebugString = "<LDX abs,y> - Load Index X With Absolute Y Indexed";
+        break;
+    case Opcode::LOAD_INDEX_Y_WITH_ABSOLUTE:
+        opcodeDebugString = "<LDY abs> - Load Index Y With Absolute";
+        break;
+    case Opcode::LOAD_INDEX_Y_WITH_IMMEDIATE:
+        opcodeDebugString = "<LDY imm> - Load Index Y With Immediate Value";
+        break;
+    case Opcode::LOAD_INDEX_Y_WITH_ZERO_PAGE:
+        opcodeDebugString = "<LDY zpg> - Load Index Y With Zero Page";
+        break;
+    case Opcode::LOAD_INDEX_Y_ZERO_PAGE_X_INDEXED:
+        opcodeDebugString = "<LDY zpg,x> - Load Index Y With Zero Page X Indexed";
+        break;
+    case Opcode::LOAD_INDEX_Y_WITH_ABSOLUTE_X_INDEXED:
+        opcodeDebugString = "<LDY abs,x> - Load Index Y With Absolute X Indexed";
         break;
     case Opcode::UNKNOWN_OPCODE:
     default:
