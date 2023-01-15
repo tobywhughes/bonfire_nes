@@ -55,10 +55,7 @@ private:
     void incrementIndexX();
     void decrementIndexX();
     void decrementIndexY();
-    void storeIndexXAtAbsolute(Memory &memory);
     void jumpAbsoluteSaveReturn(Memory &memory);
-    void storeIndexYAtZeroPage(Memory &memory);
-    void storeIndexXAtZeroPage(Memory &memory);
     void storeAccumulatorAtZeroPage(Memory &memory);
     void storeAccumulatorAtIndirectYIndexed(Memory &memory);
     void storeAccumulatorAtZeroPageXIndex(Memory &memory);
@@ -82,6 +79,8 @@ private:
     void clearFlag(uint8_t opcode);
     void loadIndexX(Memory &memory, uint8_t opcode);
     void loadIndexY(Memory &memory, uint8_t opcode);
+    void storeIndexY(Memory &memory, uint8_t opcode);
+    void storeIndexX(Memory &memory, uint8_t opcode);
     void loadAccumulator(Memory &memory, uint8_t opcode);
     void compareIndexX(Memory &memory, uint8_t opcode);
     void compareIndexY(Memory &memory, uint8_t opcode);
@@ -94,6 +93,11 @@ private:
     uint8_t getZeroPage(Memory &memory);
     uint8_t getZeroPageXIndexed(Memory &memory);
     uint8_t getZeroPageYIndexed(Memory &memory);
+
+    uint16_t getAbsoluteAddress(Memory &memory);
+    uint16_t getZeroPageAddress(Memory &memory);
+    uint16_t getZeroPageAddressXIndexed(Memory &memory);
+    uint16_t getZeroPageAddressYIndexed(Memory &memory);
 
     // Misc Utils
     void setCompareStatus(uint8_t registerValue, uint8_t operand, uint8_t result);

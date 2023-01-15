@@ -84,21 +84,22 @@ void CPU::execute(Memory &memory, unsigned long int opcodesExecuted)
     case Opcode::INCREMENT_INDEX_Y:
         incrementIndexY();
         break;
-    case Opcode::STORE_INDEX_X_AT_ABSOLUTE:
-        storeIndexXAtAbsolute(memory);
-        break;
     case Opcode::JUMP_ABSOLUTE_SAVE_RETURN:
         jumpAbsoluteSaveReturn(memory);
         break;
     case Opcode::STORE_INDEX_Y_AT_ZERO_PAGE:
-        storeIndexYAtZeroPage(memory);
+    case Opcode::STORE_INDEX_Y_AT_ZERO_PAGE_X_INDEXED:
+    case Opcode::STORE_INDEX_Y_AT_ABSOLUTE:
+        storeIndexY(memory, opcode);
+        break;
+    case Opcode::STORE_INDEX_X_AT_ZERO_PAGE:
+    case Opcode::STORE_INDEX_X_AT_ZERO_PAGE_Y_INDEXED:
+    case Opcode::STORE_INDEX_X_AT_ABSOLUTE:
+        storeIndexX(memory, opcode);
         break;
     case Opcode::STORE_ACCUMULATOR_AT_ZERO_PAGE:
         storeAccumulatorAtZeroPage(memory);
-        break;
-    case Opcode::STORE_INDEX_X_AT_ZERO_PAGE:
-        storeIndexXAtZeroPage(memory);
-        break;
+
     case Opcode::STORE_ACCUMULATOR_AT_INDIRECT_Y_INDEXED:
         storeAccumulatorAtIndirectYIndexed(memory);
         break;
@@ -243,17 +244,55 @@ void CPU::storeAccumulatorAtAbsoluteXIndexed(Memory &memory)
     printVerbose(verboseString.str());
 }
 
-void CPU::storeIndexYAtZeroPage(Memory &memory)
+void CPU::storeIndexY(Memory &memory, uint8_t opcode)
 {
-    uint8_t address = memory.read8(m_programCounter);
-    m_programCounter += 1;
+    uint16_t address;
+    switch (opcode)
+    {
+    case Opcode::STORE_INDEX_Y_AT_ZERO_PAGE:
+        address = getZeroPageAddress(memory);
+        break;
+    case Opcode::STORE_INDEX_Y_AT_ZERO_PAGE_X_INDEXED:
+        address = getZeroPageAddressXIndexed(memory);
+        break;
+    case Opcode::STORE_INDEX_Y_AT_ABSOLUTE:
+        address = getAbsoluteAddress(memory);
+        break;
+    default:
+        cout << T_ERROR << "Emulator Opcode Error - STY Called Invalid Opcode 0x" << hex << int(opcode) << endl;
+        exit(0);
+    }
 
-    uint16_t zeroPagedAddress = 0x0000 | address;
-
-    memory.write8(zeroPagedAddress, m_yIndex);
+    memory.write8(address, m_yIndex);
 
     ostringstream verboseString;
-    verboseString << "Storing Index Y value 0x" << hex << int(m_yIndex) << " at zero page address {0x" << hex << int(zeroPagedAddress) << "}";
+    verboseString << "Storing Index Y value 0x" << hex << int(m_yIndex) << " at address {0x" << hex << int(address) << "}";
+    printVerbose(verboseString.str());
+}
+
+void CPU::storeIndexX(Memory &memory, uint8_t opcode)
+{
+    uint16_t address;
+    switch (opcode)
+    {
+    case Opcode::STORE_INDEX_X_AT_ZERO_PAGE:
+        address = getZeroPageAddress(memory);
+        break;
+    case Opcode::STORE_INDEX_X_AT_ZERO_PAGE_Y_INDEXED:
+        address = getZeroPageAddressYIndexed(memory);
+        break;
+    case Opcode::STORE_INDEX_X_AT_ABSOLUTE:
+        address = getAbsoluteAddress(memory);
+        break;
+    default:
+        cout << T_ERROR << "Emulator Opcode Error - STX Called Invalid Opcode 0x" << hex << int(opcode) << endl;
+        exit(0);
+    }
+
+    memory.write8(address, m_xIndex);
+
+    ostringstream verboseString;
+    verboseString << "Storing Index X value 0x" << hex << int(m_xIndex) << " at address {0x" << hex << int(address) << "}";
     printVerbose(verboseString.str());
 }
 
@@ -293,20 +332,6 @@ void CPU::storeAccumulatorAtZeroPageXIndex(Memory &memory)
     printVerbose(verboseString.str());
 }
 
-void CPU::storeIndexXAtZeroPage(Memory &memory)
-{
-    uint8_t address = memory.read8(m_programCounter);
-    m_programCounter += 1;
-
-    uint16_t zeroPagedAddress = 0x0000 | address;
-
-    memory.write8(zeroPagedAddress, m_xIndex);
-
-    ostringstream verboseString;
-    verboseString << "Storing Index X value 0x" << hex << int(m_xIndex) << " at zero page address {0x" << hex << int(zeroPagedAddress) << "}";
-    printVerbose(verboseString.str());
-}
-
 void CPU::storeAccumulatorAtZeroPage(Memory &memory)
 {
     uint8_t address = memory.read8(m_programCounter);
@@ -318,18 +343,6 @@ void CPU::storeAccumulatorAtZeroPage(Memory &memory)
 
     ostringstream verboseString;
     verboseString << "Storing Index X value 0x" << hex << int(m_accumulator) << " at zero page address {0x" << hex << int(zeroPagedAddress) << "}";
-    printVerbose(verboseString.str());
-}
-
-void CPU::storeIndexXAtAbsolute(Memory &memory)
-{
-    uint16_t absoluteAddress = memory.read16(m_programCounter);
-    m_programCounter += 2;
-
-    memory.write8(absoluteAddress, m_xIndex);
-
-    ostringstream verboseString;
-    verboseString << "Storing Index X value 0x" << hex << int(m_xIndex) << " at address {0x" << hex << int(absoluteAddress) << "}";
     printVerbose(verboseString.str());
 }
 
@@ -1096,23 +1109,24 @@ bool CPU::status_getCarry()
 
 uint8_t CPU::getAbsolute(Memory &memory)
 {
+    return memory.read8(getAbsoluteAddress(memory));
+}
+
+uint16_t CPU::getAbsoluteAddress(Memory &memory)
+{
     uint16_t absoluteAddress = memory.read16(m_programCounter);
     m_programCounter += 2;
-    return memory.read8(absoluteAddress);
+    return absoluteAddress;
 }
 
 uint8_t CPU::getAbsoluteYIndexed(Memory &memory)
 {
-    uint16_t absoluteAddress = memory.read16(m_programCounter);
-    m_programCounter += 2;
-    return memory.read8(absoluteAddress + m_yIndex);
+    return memory.read8(getAbsoluteAddress(memory) + m_yIndex);
 }
 
 uint8_t CPU::getAbsoluteXIndexed(Memory &memory)
 {
-    uint16_t absoluteAddress = memory.read16(m_programCounter);
-    m_programCounter += 2;
-    return memory.read8(absoluteAddress + m_xIndex);
+    return memory.read8(getAbsoluteAddress(memory) + m_xIndex);
 }
 
 uint8_t CPU::getImmediate(Memory &memory)
@@ -1124,33 +1138,48 @@ uint8_t CPU::getImmediate(Memory &memory)
 
 uint8_t CPU::getZeroPage(Memory &memory)
 {
-    uint8_t zeroPageOffset = getImmediate(memory);
-
-    uint16_t zeroPageAddress = 0x0000 | zeroPageOffset;
+    uint16_t zeroPageAddress = getZeroPageAddress(memory);
 
     return memory.read8(zeroPageAddress);
 }
 
+uint16_t CPU::getZeroPageAddress(Memory &memory)
+{
+    uint8_t zeroPageOffset = getImmediate(memory);
+
+    return 0x0000 | zeroPageOffset;
+}
+
 uint8_t CPU::getZeroPageXIndexed(Memory &memory)
+{
+    uint16_t zeroPageAddress = getZeroPageAddressXIndexed(memory);
+
+    return memory.read8(zeroPageAddress);
+}
+
+uint16_t CPU::getZeroPageAddressXIndexed(Memory &memory)
 {
     uint8_t zeroPageOffset = getImmediate(memory);
 
     zeroPageOffset += m_xIndex;
 
-    uint16_t zeroPageAddress = 0x0000 | zeroPageOffset;
+    return 0x0000 | zeroPageOffset;
+}
+
+uint8_t CPU::getZeroPageYIndexed(Memory &memory)
+{
+    uint16_t zeroPageAddress = getZeroPageAddressYIndexed(memory);
 
     return memory.read8(zeroPageAddress);
 }
 
-uint8_t CPU::getZeroPageYIndexed(Memory &memory)
+uint16_t CPU::getZeroPageAddressYIndexed(Memory &memory)
 {
     uint8_t zeroPageOffset = getImmediate(memory);
 
     zeroPageOffset += m_yIndex;
 
-    uint16_t zeroPageAddress = 0x0000 | zeroPageOffset;
-
-    return memory.read8(zeroPageAddress);
+    return 0x0000 | zeroPageOffset;
 }
 
 void CPU::setCompareStatus(uint8_t registerValue, uint8_t operand, uint8_t result)

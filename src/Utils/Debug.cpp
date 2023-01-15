@@ -57,20 +57,29 @@ void Debug::opcodeDebugOutput(uint8_t opcode, uint16_t programCounter, bool prin
     case Opcode::INCREMENT_INDEX_Y:
         opcodeDebugString = "<INY> - Increment Index Y";
         break;
+    case Opcode::STORE_INDEX_X_AT_ZERO_PAGE:
+        opcodeDebugString = "<STX zpg> - Store Index X At Zero Page";
+        break;
+    case Opcode::STORE_INDEX_X_AT_ZERO_PAGE_Y_INDEXED:
+        opcodeDebugString = "<STX zpg,y> - Store Index X At Zero Page Y Indexed";
+        break;
     case Opcode::STORE_INDEX_X_AT_ABSOLUTE:
-        opcodeDebugString = "<STX abs> - Store Index X At Absolute Address";
+        opcodeDebugString = "<STX abs> - Store Index X At Absolute";
         break;
     case Opcode::JUMP_ABSOLUTE_SAVE_RETURN:
         opcodeDebugString = "<JSR abs> - Jump Absolute Save Return Address";
         break;
     case Opcode::STORE_INDEX_Y_AT_ZERO_PAGE:
-        opcodeDebugString = "<STY d> - Store Index Y At Zero Page Address";
+        opcodeDebugString = "<STY zpg> - Store Index Y At Zero Page";
+        break;
+    case Opcode::STORE_INDEX_Y_AT_ZERO_PAGE_X_INDEXED:
+        opcodeDebugString = "<STY zpg,x> - Store Index Y At Zero Page X Indexed";
+        break;
+    case Opcode::STORE_INDEX_Y_AT_ABSOLUTE:
+        opcodeDebugString = "<STY abs> - Store Index Y At Absolute";
         break;
     case Opcode::STORE_ACCUMULATOR_AT_ZERO_PAGE:
         opcodeDebugString = "<STA d> - Store Accumulator At Zero Page Address";
-        break;
-    case Opcode::STORE_INDEX_X_AT_ZERO_PAGE:
-        opcodeDebugString = "<STX d> - Store Index X At Zero Page Address";
         break;
     case Opcode::STORE_ACCUMULATOR_AT_INDIRECT_Y_INDEXED:
         opcodeDebugString = "<STA (d),y> - Store Accumulator At indirect y-indexed";
