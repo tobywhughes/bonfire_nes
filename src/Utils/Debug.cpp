@@ -26,9 +26,7 @@ void Debug::opcodeDebugOutput(uint8_t opcode, uint16_t programCounter, bool prin
     case Opcode::STORE_ACCUMULATOR_AT_ABSOLUTE_X_INDEXED:
         opcodeDebugString = "<STA abs,X> - Store Accumulator At Absolute Address X-Indexed";
         break;
-    case Opcode::LOAD_ACCUMULATOR_WITH_IMMEDIATE:
-        opcodeDebugString = "<LDA imm> - Load Accumulator With Immediate Value";
-        break;
+
     case Opcode::CLEAR_DECIMAL_MODE:
         opcodeDebugString = "<CLD> - Clear Decimal Mode";
         break;
@@ -143,9 +141,6 @@ void Debug::opcodeDebugOutput(uint8_t opcode, uint16_t programCounter, bool prin
     case Opcode::CLEAR_CARRY_FLAG:
         opcodeDebugString = "<CLC> - Clear Carry Flag";
         break;
-    case Opcode::LOAD_ACCUMULATOR_WITH_ZERO_PAGE:
-        opcodeDebugString = "<LDA zpg> - Load Accumulator With Zero Page";
-        break;
     case Opcode::AND_ACCUMULATOR_WITH_IMMEDIATE:
         opcodeDebugString = "<AND imm> - AND Accumulator With Immediate";
         break;
@@ -178,6 +173,24 @@ void Debug::opcodeDebugOutput(uint8_t opcode, uint16_t programCounter, bool prin
         break;
     case Opcode::LOAD_INDEX_Y_WITH_ABSOLUTE_X_INDEXED:
         opcodeDebugString = "<LDY abs,x> - Load Index Y With Absolute X Indexed";
+        break;
+    case Opcode::LOAD_ACCUMULATOR_WITH_ABSOLUTE:
+        opcodeDebugString = "<LDY abs> - Load Accumulator With Absolute";
+        break;
+    case Opcode::LOAD_ACCUMULATOR_WITH_IMMEDIATE:
+        opcodeDebugString = "<LDA imm> - Load Accumulator With Immediate Value";
+        break;
+    case Opcode::LOAD_ACCUMULATOR_WITH_ZERO_PAGE:
+        opcodeDebugString = "<LDA zpg> - Load Accumulator With Zero Page";
+        break;
+    case Opcode::LOAD_ACCUMULATOR_ZERO_PAGE_X_INDEXED:
+        opcodeDebugString = "<LDA zpg,x> - Load Accumulator With Zero Page X Indexed";
+        break;
+    case Opcode::LOAD_ACCUMULATOR_WITH_ABSOLUTE_X_INDEXED:
+        opcodeDebugString = "<LDA abs,x> - Load Accumulator With Absolute X Indexed";
+        break;
+    case Opcode::LOAD_ACCUMULATOR_WITH_INDIRECT_Y_INDEXED:
+        opcodeDebugString = "<LDA abs,y> - Load Accumulator With Absolute Y Indexed";
         break;
     case Opcode::COMPARE_IMMEDIATE_AND_INDEX_X:
         opcodeDebugString = "<CPX imm> - Compare Immediate With Index X";

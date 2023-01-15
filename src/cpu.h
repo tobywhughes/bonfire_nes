@@ -47,7 +47,6 @@ private:
     void printVerbose(std::string verboseString);
     void storeAccumulatorAtAbsolute(Memory &memory);
     void storeAccumulatorAtAbsoluteXIndexed(Memory &memory);
-    void loadAccumulatorWithImmediate(Memory &memory);
     void transferIndexXToStackPointer();
     void transferAccumulatorToIndexX();
     void transferAccumulatorToIndexY();
@@ -76,7 +75,6 @@ private:
     void subractImmediateWithBorrow(Memory &memory);
     void addImmediateWithBorrow(Memory &memory);
     void shiftRightAccumulator();
-    void loadAccumulatorWithZeroPage(Memory &memory);
     void andAccumulatorWithImmediate(Memory &memory);
 
     // Combined Handlers
@@ -84,6 +82,7 @@ private:
     void clearFlag(uint8_t opcode);
     void loadIndexX(Memory &memory, uint8_t opcode);
     void loadIndexY(Memory &memory, uint8_t opcode);
+    void loadAccumulator(Memory &memory, uint8_t opcode);
     void compareIndexX(Memory &memory, uint8_t opcode);
     void compareIndexY(Memory &memory, uint8_t opcode);
 

@@ -57,9 +57,6 @@ void CPU::execute(Memory &memory, unsigned long int opcodesExecuted)
     case Opcode::STORE_ACCUMULATOR_AT_ABSOLUTE_X_INDEXED:
         storeAccumulatorAtAbsoluteXIndexed(memory);
         break;
-    case Opcode::LOAD_ACCUMULATOR_WITH_IMMEDIATE:
-        loadAccumulatorWithImmediate(memory);
-        break;
     case Opcode::TRANSFER_INDEX_X_TO_STACK_POINTER:
         transferIndexXToStackPointer();
         break;
@@ -154,9 +151,6 @@ void CPU::execute(Memory &memory, unsigned long int opcodesExecuted)
     case Opcode::SHIFT_RIGHT_ACCUMULATOR:
         shiftRightAccumulator();
         break;
-    case Opcode::LOAD_ACCUMULATOR_WITH_ZERO_PAGE:
-        loadAccumulatorWithZeroPage(memory);
-        break;
     case Opcode::AND_ACCUMULATOR_WITH_IMMEDIATE:
         andAccumulatorWithImmediate(memory);
         break;
@@ -173,6 +167,14 @@ void CPU::execute(Memory &memory, unsigned long int opcodesExecuted)
     case Opcode::LOAD_INDEX_Y_ZERO_PAGE_X_INDEXED:
     case Opcode::LOAD_INDEX_Y_WITH_ABSOLUTE_X_INDEXED:
         loadIndexY(memory, opcode);
+        break;
+    case Opcode::LOAD_ACCUMULATOR_WITH_ABSOLUTE:
+    case Opcode::LOAD_ACCUMULATOR_WITH_IMMEDIATE:
+    case Opcode::LOAD_ACCUMULATOR_WITH_ZERO_PAGE:
+    case Opcode::LOAD_ACCUMULATOR_ZERO_PAGE_X_INDEXED:
+    case Opcode::LOAD_ACCUMULATOR_WITH_ABSOLUTE_X_INDEXED:
+    case Opcode::LOAD_ACCUMULATOR_WITH_ABSOLUTE_Y_INDEXED:
+        loadAccumulator(memory, opcode);
         break;
     case Opcode::COMPARE_IMMEDIATE_AND_INDEX_X:
     case Opcode::COMPARE_ABSOLUTE_AND_INDEX_X:
@@ -331,39 +333,9 @@ void CPU::storeIndexXAtAbsolute(Memory &memory)
     printVerbose(verboseString.str());
 }
 
-void CPU::loadAccumulatorWithImmediate(Memory &memory)
-{
-    uint8_t immediateValue = memory.read8(m_programCounter);
-    m_programCounter += 1;
-
-    m_accumulator = immediateValue;
-
-    status_setNegative((m_accumulator & 0b10000000) != 0);
-    status_setZero(m_accumulator == 0);
-
-    ostringstream verboseString;
-    verboseString << "Loading Accumulator with value 0x" << hex << int(immediateValue);
-    printVerbose(verboseString.str());
-}
-
-void CPU::loadAccumulatorWithZeroPage(Memory &memory)
-{
-    uint8_t result = getZeroPage(memory);
-
-    m_accumulator = result;
-
-    status_setNegative((m_accumulator & 0b10000000) != 0);
-    status_setZero(m_accumulator == 0);
-
-    ostringstream verboseString;
-    verboseString << "Loading Accumulator with value 0x" << hex << int(result);
-    printVerbose(verboseString.str());
-}
-
 void CPU::loadIndexX(Memory &memory, uint8_t opcode)
 {
     uint8_t resultValue;
-    uint16_t absoluteAddress;
 
     switch (opcode)
     {
@@ -400,7 +372,6 @@ void CPU::loadIndexX(Memory &memory, uint8_t opcode)
 void CPU::loadIndexY(Memory &memory, uint8_t opcode)
 {
     uint8_t resultValue;
-    uint16_t absoluteAddress;
 
     switch (opcode)
     {
@@ -431,6 +402,45 @@ void CPU::loadIndexY(Memory &memory, uint8_t opcode)
 
     ostringstream verboseString;
     verboseString << "Loading Y Index with value 0x" << hex << int(resultValue);
+    printVerbose(verboseString.str());
+}
+
+void CPU::loadAccumulator(Memory &memory, uint8_t opcode)
+{
+    uint8_t resultValue;
+
+    switch (opcode)
+    {
+    case Opcode::LOAD_ACCUMULATOR_WITH_ABSOLUTE:
+        resultValue = getAbsolute(memory);
+        break;
+    case Opcode::LOAD_ACCUMULATOR_WITH_IMMEDIATE:
+        resultValue = getImmediate(memory);
+        break;
+    case Opcode::LOAD_ACCUMULATOR_WITH_ZERO_PAGE:
+        resultValue = getZeroPage(memory);
+        break;
+    case Opcode::LOAD_ACCUMULATOR_ZERO_PAGE_X_INDEXED:
+        resultValue = getZeroPageXIndexed(memory);
+        break;
+    case Opcode::LOAD_ACCUMULATOR_WITH_ABSOLUTE_X_INDEXED:
+        resultValue = getAbsoluteXIndexed(memory);
+        break;
+    case Opcode::LOAD_ACCUMULATOR_WITH_ABSOLUTE_Y_INDEXED:
+        resultValue = getAbsoluteYIndexed(memory);
+        break;
+    default:
+        cout << T_ERROR << "Emulator Opcode Error - LDA Called Invalid Opcode 0x" << hex << int(opcode) << endl;
+        exit(0);
+    }
+
+    m_accumulator = resultValue;
+
+    status_setNegative((m_accumulator & 0b10000000) != 0);
+    status_setZero(m_accumulator == 0);
+
+    ostringstream verboseString;
+    verboseString << "Loading Accumulator with value 0x" << hex << int(resultValue);
     printVerbose(verboseString.str());
 }
 
