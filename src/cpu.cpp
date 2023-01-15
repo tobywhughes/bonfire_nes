@@ -99,7 +99,7 @@ void CPU::execute(Memory &memory, unsigned long int opcodesExecuted)
         break;
     case Opcode::STORE_ACCUMULATOR_AT_ZERO_PAGE:
         storeAccumulatorAtZeroPage(memory);
-
+        break;
     case Opcode::STORE_ACCUMULATOR_AT_INDIRECT_Y_INDEXED:
         storeAccumulatorAtIndirectYIndexed(memory);
         break;
