@@ -179,6 +179,24 @@ void Debug::opcodeDebugOutput(uint8_t opcode, uint16_t programCounter, bool prin
     case Opcode::LOAD_INDEX_Y_WITH_ABSOLUTE_X_INDEXED:
         opcodeDebugString = "<LDY abs,x> - Load Index Y With Absolute X Indexed";
         break;
+    case Opcode::COMPARE_IMMEDIATE_AND_INDEX_X:
+        opcodeDebugString = "<CPX imm> - Compare Immediate With Index X";
+        break;
+    case Opcode::COMPARE_ABSOLUTE_AND_INDEX_X:
+        opcodeDebugString = "<CPX abs> - Compare Absolute With Index X";
+        break;
+    case Opcode::COMPARE_ZERO_PAGE_AND_INDEX_X:
+        opcodeDebugString = "<CPX zpg> - Compare Zero Page With Index X";
+        break;
+    case Opcode::COMPARE_IMMEDIATE_AND_INDEX_Y:
+        opcodeDebugString = "<CPY imm> - Compare Immediate With Index X";
+        break;
+    case Opcode::COMPARE_ABSOLUTE_AND_INDEX_Y:
+        opcodeDebugString = "<CPY abs> - Compare Absolute With Index X";
+        break;
+    case Opcode::COMPARE_ZERO_PAGE_AND_INDEX_Y:
+        opcodeDebugString = "<CPY zpg> - Compare Zero Page With Index X";
+        break;
     case Opcode::UNKNOWN_OPCODE:
     default:
         opcodeDebugString = "Unknown Opcode";

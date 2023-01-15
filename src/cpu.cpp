@@ -174,6 +174,16 @@ void CPU::execute(Memory &memory, unsigned long int opcodesExecuted)
     case Opcode::LOAD_INDEX_Y_WITH_ABSOLUTE_X_INDEXED:
         loadIndexY(memory, opcode);
         break;
+    case Opcode::COMPARE_IMMEDIATE_AND_INDEX_X:
+    case Opcode::COMPARE_ABSOLUTE_AND_INDEX_X:
+    case Opcode::COMPARE_ZERO_PAGE_AND_INDEX_X:
+        compareIndexX(memory, opcode);
+        break;
+    case Opcode::COMPARE_IMMEDIATE_AND_INDEX_Y:
+    case Opcode::COMPARE_ABSOLUTE_AND_INDEX_Y:
+    case Opcode::COMPARE_ZERO_PAGE_AND_INDEX_Y:
+        compareIndexY(memory, opcode);
+        break;
     case Opcode::UNKNOWN_OPCODE:
     default:
         cout << T_ERROR << "Unimplemented Opcode: 0x" << hex << (int)opcode << endl;
@@ -800,21 +810,66 @@ void CPU::compareWithImmediate(Memory &memory)
     m_programCounter += 1;
 
     uint8_t result = m_accumulator - immediateValue;
-    if (result == 0)
-    {
-        status_setZero(true);
-        status_setCarry(true);
-        status_setNegative(false);
-    }
-    else
-    {
-        status_setCarry(m_accumulator > immediateValue);
-        status_setZero(false);
-        status_setNegative((result & 0b1000000) != 0);
-    }
+    setCompareStatus(m_accumulator, immediateValue, result);
 
     ostringstream verboseString;
     verboseString << "Compare between accumulator 0x" << hex << int(m_accumulator) << " and immediate value 0x" << hex << int(immediateValue) << " set status register to 0x" << hex << int(m_statusRegister) << endl;
+    printVerbose(verboseString.str());
+}
+
+void CPU::compareIndexX(Memory &memory, uint8_t opcode)
+{
+    uint8_t operand;
+
+    switch (opcode)
+    {
+    case Opcode::COMPARE_IMMEDIATE_AND_INDEX_X:
+        operand = getImmediate(memory);
+        break;
+    case Opcode::COMPARE_ABSOLUTE_AND_INDEX_X:
+        operand = getAbsolute(memory);
+        break;
+    case Opcode::COMPARE_ZERO_PAGE_AND_INDEX_X:
+        operand = getZeroPage(memory);
+        break;
+    default:
+        cout << T_ERROR << "Emulator Opcode Error - CPX Called On Invalid Opcode 0x" << hex << int(opcode) << endl;
+        exit(0);
+    }
+
+    uint8_t result = m_xIndex - operand;
+    setCompareStatus(m_xIndex, operand, result);
+
+    ostringstream verboseString;
+    verboseString << "Compare between index x 0x" << hex << int(m_xIndex) << " and value 0x" << hex << int(operand) << " set status register to 0x" << hex << int(m_statusRegister) << endl;
+    printVerbose(verboseString.str());
+}
+
+void CPU::compareIndexY(Memory &memory, uint8_t opcode)
+{
+    uint8_t operand;
+
+    switch (opcode)
+    {
+    case Opcode::COMPARE_IMMEDIATE_AND_INDEX_Y:
+        operand = getImmediate(memory);
+        break;
+    case Opcode::COMPARE_ABSOLUTE_AND_INDEX_Y:
+        operand = getAbsolute(memory);
+        break;
+    case Opcode::COMPARE_ZERO_PAGE_AND_INDEX_Y:
+        operand = getZeroPage(memory);
+        break;
+    default:
+        cout << T_ERROR << "Emulator Opcode Error - CPY Called On Invalid Opcode 0x" << hex << int(opcode) << endl;
+        exit(0);
+    }
+
+    uint8_t result = m_yIndex - operand;
+    setCompareStatus(m_yIndex, operand, result);
+
+    ostringstream verboseString;
+    verboseString << "Compare between index x 0x" << hex << int(m_yIndex) << " and value 0x" << hex << int(operand) << " set status register to 0x" << hex << int(m_statusRegister) << endl;
     printVerbose(verboseString.str());
 }
 
@@ -1088,9 +1143,18 @@ uint8_t CPU::getZeroPageYIndexed(Memory &memory)
     return memory.read8(zeroPageAddress);
 }
 
-// uint8_t operand = memory.read8(m_programCounter);
-// m_programCounter += 1;
-
-// operand += m_xIndex;
-
-// memory.write8((uint16_t)operand, m_accumulator);
+void CPU::setCompareStatus(uint8_t registerValue, uint8_t operand, uint8_t result)
+{
+    if (result == 0)
+    {
+        status_setZero(true);
+        status_setCarry(true);
+        status_setNegative(false);
+    }
+    else
+    {
+        status_setCarry(registerValue > operand);
+        status_setZero(false);
+        status_setNegative((result & 0b1000000) != 0);
+    }
+}

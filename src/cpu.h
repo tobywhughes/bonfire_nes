@@ -84,6 +84,8 @@ private:
     void clearFlag(uint8_t opcode);
     void loadIndexX(Memory &memory, uint8_t opcode);
     void loadIndexY(Memory &memory, uint8_t opcode);
+    void compareIndexX(Memory &memory, uint8_t opcode);
+    void compareIndexY(Memory &memory, uint8_t opcode);
 
     // Memory Helpers
     uint8_t getAbsolute(Memory &memory);
@@ -93,6 +95,9 @@ private:
     uint8_t getZeroPage(Memory &memory);
     uint8_t getZeroPageXIndexed(Memory &memory);
     uint8_t getZeroPageYIndexed(Memory &memory);
+
+    // Misc Utils
+    void setCompareStatus(uint8_t registerValue, uint8_t operand, uint8_t result);
 
 public:
     CPU();
