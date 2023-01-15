@@ -76,6 +76,7 @@ private:
     void pushStatusToStack(Memory &memory);
     void compareWithImmediate(Memory &memory);
     void subractImmediateWithBorrow(Memory &memory);
+    void addImmediateWithBorrow(Memory &memory);
     void shiftRightAccumulator();
 
     // Combined Handlers

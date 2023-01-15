@@ -1,3 +1,8 @@
+/*
+FUTURE TESTING & POSSIBLE DEBUG NOTES:
+- Check if C and V flags on ABC and SBC are being set correct
+*/
+
 #include <iostream>
 #include "cpu.h"
 #include "terminal.h"
@@ -148,6 +153,9 @@ void CPU::execute(Memory &memory, unsigned long int opcodesExecuted)
         break;
     case Opcode::SUBRACT_IMMEDIATE_WITH_BORROW:
         subractImmediateWithBorrow(memory);
+        break;
+    case Opcode::ADD_IMMEDIATE_WITH_BORROW:
+        addImmediateWithBorrow(memory);
         break;
     case Opcode::SHIFT_RIGHT_ACCUMULATOR:
         shiftRightAccumulator();
@@ -733,7 +741,7 @@ void CPU::subractImmediateWithBorrow(Memory &memory)
 
     status_setZero(m_accumulator != 0);
     status_setNegative((m_accumulator & 0b1000000) != 0);
-    status_setCarry(m_accumulator > accumulatorTemp);
+    status_setCarry(m_accumulator >= accumulatorTemp and subractValue > 0);
 
     bool accumulatorTempPositive = (accumulatorTemp & 0b1000000) == 0;
     bool subtractValuePositive = (subractValue & 0b1000000) == 0;
@@ -754,6 +762,42 @@ void CPU::subractImmediateWithBorrow(Memory &memory)
 
     ostringstream verboseString;
     verboseString << "Accumulator subtracted to 0x" << hex << int(m_accumulator) << " and set status register to 0x" << hex << int(m_statusRegister) << endl;
+    printVerbose(verboseString.str());
+}
+
+void CPU::addImmediateWithBorrow(Memory &memory)
+{
+    uint8_t immediateValue = memory.read8(m_programCounter);
+    m_programCounter += 1;
+
+    uint8_t accumulatorTemp = m_accumulator;
+    uint8_t addValue = immediateValue + status_getCarry();
+
+    m_accumulator = m_accumulator + addValue;
+
+    status_setZero(m_accumulator != 0);
+    status_setNegative((m_accumulator & 0b1000000) != 0);
+    status_setCarry(m_accumulator <= accumulatorTemp && addValue > 0);
+
+    bool accumulatorTempPositive = (accumulatorTemp & 0b1000000) == 0;
+    bool addValuePositive = (addValue & 0b1000000) == 0;
+    bool resultPositive = (m_accumulator & 0b1000000) == 0;
+
+    if (accumulatorTempPositive && addValuePositive)
+    {
+        status_setOverflow(!resultPositive);
+    }
+    else if (!accumulatorTempPositive && !addValuePositive)
+    {
+        status_setOverflow(resultPositive);
+    }
+    else
+    {
+        status_setOverflow(false);
+    }
+
+    ostringstream verboseString;
+    verboseString << "Accumulator incremented to 0x" << hex << int(m_accumulator) << " and set status register to 0x" << hex << int(m_statusRegister) << endl;
     printVerbose(verboseString.str());
 }
 

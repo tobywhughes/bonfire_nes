@@ -140,6 +140,9 @@ void Debug::opcodeDebugOutput(uint8_t opcode, uint16_t programCounter, bool prin
     case Opcode::SUBRACT_IMMEDIATE_WITH_BORROW:
         opcodeDebugString = "<SBC imm> - Subract Immediate With Borrow";
         break;
+    case Opcode::ADD_IMMEDIATE_WITH_BORROW:
+        opcodeDebugString = "<ABC imm> - Add Immediate With Borrow";
+        break;
     case Opcode::SHIFT_RIGHT_ACCUMULATOR:
         opcodeDebugString = "<LSR A> - Shift Right Accumulator";
         break;
