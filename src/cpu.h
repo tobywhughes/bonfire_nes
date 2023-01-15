@@ -78,6 +78,7 @@ private:
     void subractImmediateWithBorrow(Memory &memory);
     void addImmediateWithBorrow(Memory &memory);
     void shiftRightAccumulator();
+    void loadAccumulatorWithZeroPage(Memory &memory);
 
     // Combined Handlers
     void branchOnStatusRegister(Memory &memory, uint8_t opcode);

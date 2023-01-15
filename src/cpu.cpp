@@ -160,6 +160,9 @@ void CPU::execute(Memory &memory, unsigned long int opcodesExecuted)
     case Opcode::SHIFT_RIGHT_ACCUMULATOR:
         shiftRightAccumulator();
         break;
+    case Opcode::LOAD_ACCUMULATOR_WITH_ZERO_PAGE:
+        loadAccumulatorWithZeroPage(memory);
+        break;
     case Opcode::UNKNOWN_OPCODE:
     default:
         cout << T_ERROR << "Unimplemented Opcode: 0x" << hex << (int)opcode << endl;
@@ -319,6 +322,25 @@ void CPU::loadAccumulatorWithImmediate(Memory &memory)
 
     ostringstream verboseString;
     verboseString << "Loading Accumulator with value 0x" << hex << int(immediateValue);
+    printVerbose(verboseString.str());
+}
+
+void CPU::loadAccumulatorWithZeroPage(Memory &memory)
+{
+    uint8_t zeroPageOffset = memory.read8(m_programCounter);
+    m_programCounter += 1;
+
+    uint16_t zeroPageAddress = 0x0000 | zeroPageOffset;
+
+    uint8_t result = memory.read8(zeroPageAddress);
+
+    m_accumulator = result;
+
+    status_setNegative((m_accumulator & 0b10000000) != 0);
+    status_setZero(m_accumulator == 0);
+
+    ostringstream verboseString;
+    verboseString << "Loading Accumulator with value 0x" << hex << int(result) << "from zero page address {0x" << hex << int(zeroPageAddress) << "}";
     printVerbose(verboseString.str());
 }
 

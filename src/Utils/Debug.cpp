@@ -149,6 +149,9 @@ void Debug::opcodeDebugOutput(uint8_t opcode, uint16_t programCounter, bool prin
     case Opcode::CLEAR_CARRY_FLAG:
         opcodeDebugString = "<CLC> - Clear Carry Flag";
         break;
+    case Opcode::LOAD_ACCUMULATOR_WITH_ZERO_PAGE:
+        opcodeDebugString = "<LDA zpg> - Load Accumulator With Zero Page";
+        break;
     case Opcode::UNKNOWN_OPCODE:
     default:
         opcodeDebugString = "Unknown Opcode";
