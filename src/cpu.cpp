@@ -68,11 +68,17 @@ void CPU::execute(Memory &memory, unsigned long int opcodesExecuted)
     case Opcode::TRANSFER_STACK_POINTER_TO_INDEX_X:
         transferStackPointerToIndexX();
         break;
+    case Opcode::TRANSFER_INDEX_Y_TO_ACCUMULATOR:
+        transferIndexYToAccumulator();
+        break;
     case Opcode::INCREMENT_INDEX_X:
         incrementIndexX();
         break;
     case Opcode::DECREMENT_INDEX_X:
         decrementIndexX();
+        break;
+    case Opcode::DECREMENT_INDEX_Y:
+        decrementIndexY();
         break;
     case Opcode::INCREMENT_INDEX_Y:
         incrementIndexY();
@@ -97,6 +103,12 @@ void CPU::execute(Memory &memory, unsigned long int opcodesExecuted)
         break;
     case Opcode::BRANCH_ON_ZERO_CLEAR:
         branchOnZeroClear(memory);
+        break;
+    case Opcode::BRANCH_ON_NEGATIVE_SET:
+        branchOnNegativeSet(memory);
+        break;
+    case Opcode::BRANCH_ON_NEGATIVE_CLEAR:
+        branchOnNegativeClear(memory);
         break;
     case Opcode::INCREMENT_ZERO_PAGED_ADDRESS:
         incrementZeroPagedAddress(memory);
@@ -327,6 +339,18 @@ void CPU::transferStackPointerToIndexX()
     printVerbose(verboseString.str());
 }
 
+void CPU::transferIndexYToAccumulator()
+{
+    m_accumulator = m_yIndex;
+
+    status_setNegative((m_accumulator & 0b10000000) != 0);
+    status_setZero(m_accumulator == 0);
+
+    ostringstream verboseString;
+    verboseString << "Loading Accumulator with value 0x" << hex << int(m_xIndex);
+    printVerbose(verboseString.str());
+}
+
 void CPU::incrementIndexX()
 {
     m_xIndex += 1;
@@ -348,6 +372,18 @@ void CPU::decrementIndexX()
 
     ostringstream verboseString;
     verboseString << "Index X decremented to value 0x" << hex << int(m_xIndex);
+    printVerbose(verboseString.str());
+}
+
+void CPU::decrementIndexY()
+{
+    m_yIndex -= 1;
+
+    status_setNegative((m_yIndex & 0b10000000) != 0);
+    status_setZero(m_yIndex == 0);
+
+    ostringstream verboseString;
+    verboseString << "Index Y decremented to value 0x" << hex << int(m_yIndex);
     printVerbose(verboseString.str());
 }
 
@@ -434,12 +470,83 @@ void CPU::branchOnZeroClear(Memory &memory)
         {
             m_programCounter += immediateValue;
             verboseString << "BNE - PC incremented by " << unsigned(immediateValue) << " to {0x" << hex << int(m_programCounter) << "}";
-            verboseString << "BNE - No Action Taken";
         }
     }
     else
     {
         verboseString << "BNE - No Action Taken";
+    }
+
+    printVerbose(verboseString.str());
+}
+
+void CPU::branchOnNegativeSet(Memory &memory)
+{
+    uint8_t immediateValue = memory.read8(m_programCounter);
+    m_programCounter += 1;
+
+    bool isSigned = (immediateValue & 0b10000000) != 0;
+    if (isSigned)
+    {
+        immediateValue = ~immediateValue + 1;
+    }
+
+    bool negativeStatus = status_getNegative();
+
+    ostringstream verboseString;
+
+    if (negativeStatus)
+    {
+        if (isSigned)
+        {
+            m_programCounter -= immediateValue;
+            verboseString << "BMI - PC decremented by " << unsigned(immediateValue) << " to {0x" << hex << int(m_programCounter) << "}";
+        }
+        else
+        {
+            m_programCounter += immediateValue;
+            verboseString << "BMI - PC incremented by " << unsigned(immediateValue) << " to {0x" << hex << int(m_programCounter) << "}";
+        }
+    }
+    else
+    {
+        verboseString << "BMI - No Action Taken";
+    }
+
+    printVerbose(verboseString.str());
+}
+
+void CPU::branchOnNegativeClear(Memory &memory)
+{
+    uint8_t immediateValue = memory.read8(m_programCounter);
+    m_programCounter += 1;
+
+    bool isSigned = (immediateValue & 0b10000000) != 0;
+    if (isSigned)
+    {
+        immediateValue = ~immediateValue + 1;
+    }
+
+    bool negativeStatus = status_getNegative();
+
+    ostringstream verboseString;
+
+    if (!negativeStatus)
+    {
+        if (isSigned)
+        {
+            m_programCounter -= immediateValue;
+            verboseString << "BPL - PC decremented by " << unsigned(immediateValue) << " to {0x" << hex << int(m_programCounter) << "}";
+        }
+        else
+        {
+            m_programCounter += immediateValue;
+            verboseString << "BPL - PC incremented by " << unsigned(immediateValue) << " to {0x" << hex << int(m_programCounter) << "}";
+        }
+    }
+    else
+    {
+        verboseString << "BPL - No Action Taken";
     }
 
     printVerbose(verboseString.str());

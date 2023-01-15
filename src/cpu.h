@@ -53,8 +53,10 @@ private:
     void transferIndexXToStackPointer();
     void transferAccumulatorToIndexX();
     void transferStackPointerToIndexX();
+    void transferIndexYToAccumulator();
     void incrementIndexX();
     void decrementIndexX();
+    void decrementIndexY();
     void storeIndexXAtAbsolute(Memory &memory);
     void jumpAbsoluteSaveReturn(Memory &memory);
     void storeIndexYAtZeroPage(Memory &memory);
@@ -63,6 +65,8 @@ private:
     void storeAccumulatorAtZeroPageXIndex(Memory &memory);
     void incrementIndexY();
     void branchOnZeroClear(Memory &memory);
+    void branchOnNegativeSet(Memory &memory);
+    void branchOnNegativeClear(Memory &memory);
     void incrementZeroPagedAddress(Memory &memory);
     void returnFromSubroutine(Memory &memory);
     void absoluteBitwiseTest(Memory &memory);

@@ -44,11 +44,17 @@ void Debug::opcodeDebugOutput(uint8_t opcode, uint16_t programCounter, bool prin
     case Opcode::TRANSFER_STACK_POINTER_TO_INDEX_X:
         opcodeDebugString = "<TSX> - Transfer Stack Pointer To Index X";
         break;
+    case Opcode::TRANSFER_INDEX_Y_TO_ACCUMULATOR:
+        opcodeDebugString = "<TYA> - Transfer Index Y To Accumulator";
+        break;
     case Opcode::INCREMENT_INDEX_X:
         opcodeDebugString = "<INX> - Increment Index X";
         break;
     case Opcode::DECREMENT_INDEX_X:
         opcodeDebugString = "<DEX> - Decrement Index X";
+        break;
+    case Opcode::DECREMENT_INDEX_Y:
+        opcodeDebugString = "<DEY> - Decrement Index Y";
         break;
     case Opcode::INCREMENT_INDEX_Y:
         opcodeDebugString = "<INY> - Increment Index Y";
@@ -73,6 +79,12 @@ void Debug::opcodeDebugOutput(uint8_t opcode, uint16_t programCounter, bool prin
         break;
     case Opcode::BRANCH_ON_ZERO_CLEAR:
         opcodeDebugString = "<BNE rel> - Branch On Zero Clear";
+        break;
+    case Opcode::BRANCH_ON_NEGATIVE_SET:
+        opcodeDebugString = "<BMI> - Branch On Negative Set";
+        break;
+    case Opcode::BRANCH_ON_NEGATIVE_CLEAR:
+        opcodeDebugString = "<BPL> - Branch On Negative Clear";
         break;
     case Opcode::INCREMENT_ZERO_PAGED_ADDRESS:
         opcodeDebugString = "<INC d> - Increment Zero Paged Address";
