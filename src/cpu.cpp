@@ -38,6 +38,9 @@ void CPU::execute(Memory &memory, unsigned long int opcodesExecuted)
     case Opcode::SET_INTERRUPT_DISABLE:
         setInterruptDisable();
         break;
+    case Opcode::CLEAR_INTERRUPT_DISABLE:
+        clearInterruptDisable();
+        break;
     case Opcode::JUMP_ABSOLUTE:
         jumpAbsolute(memory);
         break;
@@ -108,13 +111,14 @@ void CPU::execute(Memory &memory, unsigned long int opcodesExecuted)
         storeAccumulatorAtZeroPageXIndex(memory);
         break;
     case Opcode::BRANCH_ON_ZERO_CLEAR:
-        branchOnZeroClear(memory);
-        break;
-    case Opcode::BRANCH_ON_NEGATIVE_SET:
-        branchOnNegativeSet(memory);
-        break;
+    case Opcode::BRANCH_ON_ZERO_SET:
     case Opcode::BRANCH_ON_NEGATIVE_CLEAR:
-        branchOnNegativeClear(memory);
+    case Opcode::BRANCH_ON_NEGATIVE_SET:
+    case Opcode::BRANCH_ON_CARRY_CLEAR:
+    case Opcode::BRANCH_ON_CARRY_SET:
+    case Opcode::BRANCH_ON_OVERFLOW_CLEAR:
+    case Opcode::BRANCH_ON_OVERFLOW_SET:
+        branchOnStatusRegister(memory, opcode);
         break;
     case Opcode::INCREMENT_ZERO_PAGED_ADDRESS:
         incrementZeroPagedAddress(memory);
@@ -137,6 +141,18 @@ void CPU::execute(Memory &memory, unsigned long int opcodesExecuted)
     case Opcode::PULL_STATUS_FROM_STACK:
         pullStatusFromStack(memory);
         break;
+    case Opcode::PUSH_STATUS_TO_STACK:
+        pushStatusToStack(memory);
+        break;
+    case Opcode::COMPARE_WITH_IMMEDIATE:
+        compareWithImmediate(memory);
+        break;
+    case Opcode::SUBRACT_IMMEDIATE_WITH_BORROW:
+        subractImmediateWithBorrow(memory);
+        break;
+    case Opcode::SHIFT_RIGHT_ACCUMULATOR:
+        shiftRightAccumulator();
+        break;
     case Opcode::UNKNOWN_OPCODE:
     default:
         cout << T_ERROR << "Unimplemented Opcode: 0x" << hex << (int)opcode << endl;
@@ -150,6 +166,15 @@ void CPU::execute(Memory &memory, unsigned long int opcodesExecuted)
 void CPU::setInterruptDisable()
 {
     status_setInterrupt(true);
+
+    ostringstream verboseString;
+    verboseString << "Status Register Updated: 0b" << bitset<8>(m_statusRegister);
+    printVerbose(verboseString.str());
+}
+
+void CPU::clearInterruptDisable()
+{
+    status_setInterrupt(false);
 
     ostringstream verboseString;
     verboseString << "Status Register Updated: 0b" << bitset<8>(m_statusRegister);
@@ -488,7 +513,7 @@ void CPU::jumpAbsoluteSaveReturn(Memory &memory)
     printVerbose(verboseString.str());
 }
 
-void CPU::branchOnZeroClear(Memory &memory)
+void CPU::branchOnStatusRegister(Memory &memory, uint8_t opcode)
 {
     uint8_t immediateValue = memory.read8(m_programCounter);
     m_programCounter += 1;
@@ -499,98 +524,66 @@ void CPU::branchOnZeroClear(Memory &memory)
         immediateValue = ~immediateValue + 1;
     }
 
-    bool zeroStatus = status_getZero();
+    bool statusValue;
+    string opcodeMnemonic;
+
+    switch (opcode)
+    {
+    case Opcode::BRANCH_ON_CARRY_CLEAR:
+        statusValue = !status_getCarry();
+        opcodeMnemonic = "BCC";
+        break;
+    case Opcode::BRANCH_ON_CARRY_SET:
+        statusValue = status_getCarry();
+        opcodeMnemonic = "BCS";
+        break;
+    case Opcode::BRANCH_ON_NEGATIVE_CLEAR:
+        statusValue = !status_getNegative();
+        opcodeMnemonic = "BPL";
+        break;
+    case Opcode::BRANCH_ON_NEGATIVE_SET:
+        statusValue = status_getNegative();
+        opcodeMnemonic = "BMI";
+        break;
+    case Opcode::BRANCH_ON_ZERO_CLEAR:
+        statusValue = !status_getZero();
+        opcodeMnemonic = "BNE";
+        break;
+    case Opcode::BRANCH_ON_ZERO_SET:
+        statusValue = status_getZero();
+        opcodeMnemonic = "BEQ";
+        break;
+    case Opcode::BRANCH_ON_OVERFLOW_CLEAR:
+        statusValue = !status_getOverflow();
+        opcodeMnemonic = "BVC";
+        break;
+    case Opcode::BRANCH_ON_OVERFLOW_SET:
+        statusValue = status_getOverflow();
+        opcodeMnemonic = "BVS";
+        break;
+    default:
+        cout << T_ERROR << "Emulator Opcode Error - Branch Called On Invalid Opcode 0x" << hex << int(opcode) << endl;
+        exit(0);
+    }
 
     ostringstream verboseString;
 
-    if (!zeroStatus)
+    if (statusValue)
     {
         if (isSigned)
         {
             m_programCounter -= immediateValue;
-            verboseString << "BNE - PC decremented by " << unsigned(immediateValue) << " to {0x" << hex << int(m_programCounter) << "}";
+            verboseString << opcodeMnemonic << " - PC decremented by " << unsigned(immediateValue) << " to {0x" << hex << int(m_programCounter) << "}";
         }
         else
         {
             m_programCounter += immediateValue;
-            verboseString << "BNE - PC incremented by " << unsigned(immediateValue) << " to {0x" << hex << int(m_programCounter) << "}";
+            verboseString << opcodeMnemonic << " - PC incremented by " << unsigned(immediateValue) << " to {0x" << hex << int(m_programCounter) << "}";
         }
     }
     else
     {
-        verboseString << "BNE - No Action Taken";
-    }
-
-    printVerbose(verboseString.str());
-}
-
-void CPU::branchOnNegativeSet(Memory &memory)
-{
-    uint8_t immediateValue = memory.read8(m_programCounter);
-    m_programCounter += 1;
-
-    bool isSigned = (immediateValue & 0b10000000) != 0;
-    if (isSigned)
-    {
-        immediateValue = ~immediateValue + 1;
-    }
-
-    bool negativeStatus = status_getNegative();
-
-    ostringstream verboseString;
-
-    if (negativeStatus)
-    {
-        if (isSigned)
-        {
-            m_programCounter -= immediateValue;
-            verboseString << "BMI - PC decremented by " << unsigned(immediateValue) << " to {0x" << hex << int(m_programCounter) << "}";
-        }
-        else
-        {
-            m_programCounter += immediateValue;
-            verboseString << "BMI - PC incremented by " << unsigned(immediateValue) << " to {0x" << hex << int(m_programCounter) << "}";
-        }
-    }
-    else
-    {
-        verboseString << "BMI - No Action Taken";
-    }
-
-    printVerbose(verboseString.str());
-}
-
-void CPU::branchOnNegativeClear(Memory &memory)
-{
-    uint8_t immediateValue = memory.read8(m_programCounter);
-    m_programCounter += 1;
-
-    bool isSigned = (immediateValue & 0b10000000) != 0;
-    if (isSigned)
-    {
-        immediateValue = ~immediateValue + 1;
-    }
-
-    bool negativeStatus = status_getNegative();
-
-    ostringstream verboseString;
-
-    if (!negativeStatus)
-    {
-        if (isSigned)
-        {
-            m_programCounter -= immediateValue;
-            verboseString << "BPL - PC decremented by " << unsigned(immediateValue) << " to {0x" << hex << int(m_programCounter) << "}";
-        }
-        else
-        {
-            m_programCounter += immediateValue;
-            verboseString << "BPL - PC incremented by " << unsigned(immediateValue) << " to {0x" << hex << int(m_programCounter) << "}";
-        }
-    }
-    else
-    {
-        verboseString << "BPL - No Action Taken";
+        verboseString << opcodeMnemonic << " - No Action Taken";
     }
 
     printVerbose(verboseString.str());
@@ -658,6 +651,17 @@ void CPU::pushAccumulatorToStack(Memory &memory)
     printVerbose(verboseString.str());
 }
 
+void CPU::pushStatusToStack(Memory &memory)
+{
+    memory.write8(m_stackPointer + 0x100, m_statusRegister);
+    m_stackPointer -= 1;
+
+    ostringstream verboseString;
+    verboseString << "Pushed status value 0x" << hex << int(m_accumulator) << " to stack" << endl;
+    verboseString << T_DEBUG << "New Stack Pointer value: 0x" << hex << (int)m_stackPointer;
+    printVerbose(verboseString.str());
+}
+
 void CPU::pullAccumulatorFromStack(Memory &memory)
 {
     m_stackPointer += 1;
@@ -684,6 +688,83 @@ void CPU::pullStatusFromStack(Memory &memory)
     ostringstream verboseString;
     verboseString << "Pulled accumulator value 0x" << hex << int(m_accumulator) << " from stack" << endl;
     verboseString << T_DEBUG << "New Stack Pointer value: 0x" << hex << (int)m_stackPointer;
+    printVerbose(verboseString.str());
+}
+
+void CPU::compareWithImmediate(Memory &memory)
+{
+    uint8_t immediateValue = memory.read8(m_programCounter);
+    m_programCounter += 1;
+
+    uint8_t result = m_accumulator - immediateValue;
+    if (result == 0)
+    {
+        status_setZero(true);
+        status_setCarry(true);
+        status_setNegative(false);
+    }
+    else
+    {
+        status_setCarry(m_accumulator > immediateValue);
+        status_setZero(false);
+        status_setNegative((result & 0b1000000) != 0);
+    }
+
+    ostringstream verboseString;
+    verboseString << "Compare between accumulator 0x" << hex << int(m_accumulator) << " and immediate value 0x" << hex << int(immediateValue) << " set status register to 0x" << hex << int(m_statusRegister) << endl;
+    printVerbose(verboseString.str());
+}
+
+void CPU::subractImmediateWithBorrow(Memory &memory)
+{
+    uint8_t immediateValue = memory.read8(m_programCounter);
+    m_programCounter += 1;
+
+    uint8_t invertedCarryValue = (uint8_t) !(status_getCarry());
+
+    uint8_t accumulatorTemp = m_accumulator;
+    uint8_t subractValue = immediateValue + invertedCarryValue;
+
+    m_accumulator = m_accumulator - subractValue;
+
+    status_setZero(m_accumulator != 0);
+    status_setNegative((m_accumulator & 0b1000000) != 0);
+    status_setCarry(m_accumulator > accumulatorTemp);
+
+    bool accumulatorTempPositive = (accumulatorTemp & 0b1000000) == 0;
+    bool subtractValuePositive = (subractValue & 0b1000000) == 0;
+    bool resultPositive = (m_accumulator & 0b1000000) == 0;
+
+    if (accumulatorTempPositive && subtractValuePositive)
+    {
+        status_setOverflow(!resultPositive);
+    }
+    else if (!accumulatorTempPositive && !subtractValuePositive)
+    {
+        status_setOverflow(resultPositive);
+    }
+    else
+    {
+        status_setOverflow(false);
+    }
+
+    ostringstream verboseString;
+    verboseString << "Accumulator subtracted to 0x" << hex << int(m_accumulator) << " and set status register to 0x" << hex << int(m_statusRegister) << endl;
+    printVerbose(verboseString.str());
+}
+
+void CPU::shiftRightAccumulator()
+{
+    bool carryFlag = (m_accumulator & 0b00000001) != 0;
+
+    m_accumulator = m_accumulator >> 1;
+
+    status_setNegative(false);
+    status_setZero(m_accumulator == 0);
+    status_setCarry(carryFlag);
+
+    ostringstream verboseString;
+    verboseString << "Accumulator shifted right to 0x" << hex << int(m_accumulator) << " and set status register to 0x" << hex << int(m_statusRegister) << endl;
     printVerbose(verboseString.str());
 }
 

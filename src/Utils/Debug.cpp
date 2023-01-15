@@ -14,6 +14,9 @@ void Debug::opcodeDebugOutput(uint8_t opcode, uint16_t programCounter, bool prin
     case Opcode::SET_INTERRUPT_DISABLE:
         opcodeDebugString = "<SIE> Set Interrupt Disable";
         break;
+    case Opcode::CLEAR_INTERRUPT_DISABLE:
+        opcodeDebugString = "<CLI> Clear Interrupt Disable";
+        break;
     case Opcode::JUMP_ABSOLUTE:
         opcodeDebugString = "<JMP abs> - Jump Absolute";
         break;
@@ -84,13 +87,28 @@ void Debug::opcodeDebugOutput(uint8_t opcode, uint16_t programCounter, bool prin
         opcodeDebugString = "<STA d,x> - Store Accumulator At zero page x-indexed";
         break;
     case Opcode::BRANCH_ON_ZERO_CLEAR:
-        opcodeDebugString = "<BNE rel> - Branch On Zero Clear";
+        opcodeDebugString = "<BNE> - Branch On Zero Clear";
+        break;
+    case Opcode::BRANCH_ON_ZERO_SET:
+        opcodeDebugString = "<BEQ> - Branch On Zero Set";
         break;
     case Opcode::BRANCH_ON_NEGATIVE_SET:
         opcodeDebugString = "<BMI> - Branch On Negative Set";
         break;
+    case Opcode::BRANCH_ON_CARRY_SET:
+        opcodeDebugString = "<BCS> - Branch On Carry Set";
+        break;
     case Opcode::BRANCH_ON_NEGATIVE_CLEAR:
         opcodeDebugString = "<BPL> - Branch On Negative Clear";
+        break;
+    case Opcode::BRANCH_ON_CARRY_CLEAR:
+        opcodeDebugString = "<BCC> - Branch On Carry Clear";
+        break;
+    case Opcode::BRANCH_ON_OVERFLOW_CLEAR:
+        opcodeDebugString = "<BVC> - Branch On Overflow Clear";
+        break;
+    case Opcode::BRANCH_ON_OVERFLOW_SET:
+        opcodeDebugString = "<BVS> - Branch On Overflow Set";
         break;
     case Opcode::INCREMENT_ZERO_PAGED_ADDRESS:
         opcodeDebugString = "<INC d> - Increment Zero Paged Address";
@@ -112,6 +130,18 @@ void Debug::opcodeDebugOutput(uint8_t opcode, uint16_t programCounter, bool prin
         break;
     case Opcode::PULL_STATUS_FROM_STACK:
         opcodeDebugString = "<PLP> - Pull Status From Stack";
+        break;
+    case Opcode::PUSH_STATUS_TO_STACK:
+        opcodeDebugString = "<PHP> - Push Status To Stack";
+        break;
+    case Opcode::COMPARE_WITH_IMMEDIATE:
+        opcodeDebugString = "<CMP imm> - Compare With Immediate";
+        break;
+    case Opcode::SUBRACT_IMMEDIATE_WITH_BORROW:
+        opcodeDebugString = "<SBC imm> - Subract Immediate With Borrow";
+        break;
+    case Opcode::SHIFT_RIGHT_ACCUMULATOR:
+        opcodeDebugString = "<LSR A> - Shift Right Accumulator";
         break;
     case Opcode::UNKNOWN_OPCODE:
     default:

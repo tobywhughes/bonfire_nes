@@ -41,7 +41,9 @@ private:
     bool status_getZero();
     bool status_getCarry();
 
+    // Opcode Handlers
     void setInterruptDisable();
+    void clearInterruptDisable();
     void clearDecimalMode();
     void jumpAbsolute(Memory &memory);
     void printVerbose(std::string verboseString);
@@ -66,9 +68,6 @@ private:
     void storeAccumulatorAtIndirectYIndexed(Memory &memory);
     void storeAccumulatorAtZeroPageXIndex(Memory &memory);
     void incrementIndexY();
-    void branchOnZeroClear(Memory &memory);
-    void branchOnNegativeSet(Memory &memory);
-    void branchOnNegativeClear(Memory &memory);
     void incrementZeroPagedAddress(Memory &memory);
     void returnFromSubroutine(Memory &memory);
     void absoluteBitwiseTest(Memory &memory);
@@ -76,6 +75,13 @@ private:
     void pushAccumulatorToStack(Memory &memory);
     void pullAccumulatorFromStack(Memory &memory);
     void pullStatusFromStack(Memory &memory);
+    void pushStatusToStack(Memory &memory);
+    void compareWithImmediate(Memory &memory);
+    void subractImmediateWithBorrow(Memory &memory);
+    void shiftRightAccumulator();
+
+    // Combined Handlers
+    void branchOnStatusRegister(Memory &memory, uint8_t opcode);
 
 public:
     CPU();
