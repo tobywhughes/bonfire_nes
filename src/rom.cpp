@@ -6,7 +6,7 @@
 
 using namespace std;
 
-Rom::Rom(string fileName)
+Rom::Rom(string fileName) : prgRam(0x2000, 0)
 {
     cout << T_DEBUG << "ROM Filename: " << fileName << endl;
     ifstream file(fileName, ios::binary);

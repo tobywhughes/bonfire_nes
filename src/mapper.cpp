@@ -68,7 +68,7 @@ uint16_t Mapper::read16(uint16_t address, vector<uint8_t> &prgRom, vector<uint8_
     }
 }
 
-void Mapper::write8(uint16_t address, uint8_t value, vector<uint8_t> &internalRam, PPU ppu)
+void Mapper::write8(uint16_t address, uint8_t value, vector<uint8_t> &internalRam, PPU ppu, vector<uint8_t> &prgRam)
 {
     if (address < 0x800)
     {
@@ -77,6 +77,30 @@ void Mapper::write8(uint16_t address, uint8_t value, vector<uint8_t> &internalRa
     else if ((address >= 0x2000 && address <= 0x2007) || address == 0x4014)
     {
         ppu.writeRegister(address, value);
+    }
+    // Temporary Implementation for NES Test Rom Functionality
+    // NROM 0 this is mostly unused except in Family Basic
+    // But NES Test Roms Use This To Write Results
+    else if (address >= 0x6000 && address < 0x8000)
+    {
+        prgRam[address - 0x6000] = value;
+        // Again, more temporary test runner code
+        // 0x6000 used as status bit for testing
+        if (address == 0x6000)
+        {
+            if (value == 0x80)
+            {
+                cout << T_INFO << "NES Test Rom - Tests Running" << endl;
+            }
+            else if (value == 0x81)
+            {
+                cout << T_WARNING << "NES Test Rom - Requires Reset" << endl;
+            }
+            else if (value < 0x80)
+            {
+                cout << T_INFO << "NES Test Rom - Test 0x" << hex << int(value) << " Completed" << endl;
+            }
+        }
     }
     else
     {

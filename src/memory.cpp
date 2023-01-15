@@ -19,5 +19,5 @@ uint16_t Memory::read16(uint16_t address)
 
 void Memory::write8(uint16_t address, uint8_t value)
 {
-    m_mapper.write8(address, value, m_internalRAM, m_ppu);
+    m_mapper.write8(address, value, m_internalRAM, m_ppu, m_rom.prgRam);
 }

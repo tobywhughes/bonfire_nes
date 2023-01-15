@@ -29,6 +29,7 @@ public:
     Rom(std::string fileName);
     void initialize(Mapper &mapper);
     std::vector<uint8_t> prgRom;
+    std::vector<uint8_t> prgRam; // Non-standard, including now for NES tests using it
 };
 
 #endif
