@@ -120,8 +120,23 @@ void Debug::opcodeDebugOutput(uint8_t opcode, uint16_t programCounter, bool prin
     case Opcode::ABSOLUTE_BITWISE_TEST:
         opcodeDebugString = "<BIT abs> - Absolute Bitwise Test";
         break;
+    case Opcode::OR_MEMORY_WITH_ACCUMULATOR_IMMEDIATE:
+        opcodeDebugString = "<ORA imm> - Or accumulator with immediate";
+        break;
+    case Opcode::OR_MEMORY_WITH_ACCUMULATOR_ZERO_PAGE:
+        opcodeDebugString = "<ORA zpg> - Or accumulator with zero page";
+        break;
+    case Opcode::OR_MEMORY_WITH_ACCUMULATOR_ZERO_PAGE_X_INDEXED:
+        opcodeDebugString = "<ORA zpg,x> - Or accumulator with zero page x indexed";
+        break;
     case Opcode::OR_MEMORY_WITH_ACCUMULATOR_ABSOLUTE:
-        opcodeDebugString = "<ORA abs> - Or absolute memory with accumulator";
+        opcodeDebugString = "<ORA abs> - Or accumulator with absolute";
+        break;
+    case Opcode::OR_MEMORY_WITH_ACCUMULATOR_ABSOLUTE_X_INDEXED:
+        opcodeDebugString = "<ORA abs> - Or accumulator with absolute x indexed";
+        break;
+    case Opcode::OR_MEMORY_WITH_ACCUMULATOR_ABSOLUTE_Y_INDEXED:
+        opcodeDebugString = "<ORA abs> - Or accumulator with absolute y indexed";
         break;
     case Opcode::PUSH_ACCUMULATOR_TO_STACK:
         opcodeDebugString = "<PHA> - Push Accumulator To Stack";

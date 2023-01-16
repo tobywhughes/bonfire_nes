@@ -125,9 +125,6 @@ void CPU::execute(Memory &memory, unsigned long int opcodesExecuted)
     case Opcode::ABSOLUTE_BITWISE_TEST:
         absoluteBitwiseTest(memory);
         break;
-    case Opcode::OR_MEMORY_WITH_ACCUMULATOR_ABSOLUTE:
-        orMemoryWithAccumulatorAbsolute(memory);
-        break;
     case Opcode::PUSH_ACCUMULATOR_TO_STACK:
         pushAccumulatorToStack(memory);
         break;
@@ -200,6 +197,14 @@ void CPU::execute(Memory &memory, unsigned long int opcodesExecuted)
     case Opcode::ROTATE_LEFT_ABSOLUTE:
     case Opcode::ROTATE_LEFT_ABSOLUTE_X_INDEXED:
         rotateLeft(memory, opcode);
+        break;
+    case Opcode::OR_MEMORY_WITH_ACCUMULATOR_IMMEDIATE:
+    case Opcode::OR_MEMORY_WITH_ACCUMULATOR_ZERO_PAGE:
+    case Opcode::OR_MEMORY_WITH_ACCUMULATOR_ZERO_PAGE_X_INDEXED:
+    case Opcode::OR_MEMORY_WITH_ACCUMULATOR_ABSOLUTE:
+    case Opcode::OR_MEMORY_WITH_ACCUMULATOR_ABSOLUTE_X_INDEXED:
+    case Opcode::OR_MEMORY_WITH_ACCUMULATOR_ABSOLUTE_Y_INDEXED:
+        orMemoryWithAccumulator(memory, opcode);
         break;
     case Opcode::UNKNOWN_OPCODE:
     default:
@@ -755,13 +760,36 @@ void CPU::absoluteBitwiseTest(Memory &memory)
     printVerbose(verboseString.str());
 }
 
-void CPU::orMemoryWithAccumulatorAbsolute(Memory &memory)
+void CPU::orMemoryWithAccumulator(Memory &memory, uint8_t opcode)
 {
-    uint16_t absoluteAddress = memory.read16(m_programCounter);
-    m_programCounter += 2;
+    uint8_t operand;
 
-    uint8_t memoryValue = memory.read8(absoluteAddress);
-    uint8_t resultValue = memoryValue | m_accumulator;
+    switch (opcode)
+    {
+    case Opcode::OR_MEMORY_WITH_ACCUMULATOR_IMMEDIATE:
+        operand = getImmediate(memory);
+        break;
+    case Opcode::OR_MEMORY_WITH_ACCUMULATOR_ZERO_PAGE:
+        operand = getZeroPage(memory);
+        break;
+    case Opcode::OR_MEMORY_WITH_ACCUMULATOR_ZERO_PAGE_X_INDEXED:
+        operand = getZeroPageXIndexed(memory);
+        break;
+    case Opcode::OR_MEMORY_WITH_ACCUMULATOR_ABSOLUTE:
+        operand = getAbsolute(memory);
+        break;
+    case Opcode::OR_MEMORY_WITH_ACCUMULATOR_ABSOLUTE_X_INDEXED:
+        operand = getAbsoluteXIndexed(memory);
+        break;
+    case Opcode::OR_MEMORY_WITH_ACCUMULATOR_ABSOLUTE_Y_INDEXED:
+        operand = getAbsoluteYIndexed(memory);
+        break;
+    default:
+        cout << T_ERROR << "Emulator Opcode Error - ORA Called On Invalid Opcode 0x" << hex << int(opcode) << endl;
+        exit(0);
+    }
+
+    uint8_t resultValue = operand | m_accumulator;
 
     m_accumulator = resultValue;
 
@@ -769,7 +797,7 @@ void CPU::orMemoryWithAccumulatorAbsolute(Memory &memory)
     status_setNegative((resultValue & 0b10000000) != 0);
 
     ostringstream verboseString;
-    verboseString << "OR with value 0x" << hex << int(memoryValue) << " at address {0x" << hex << int(absoluteAddress) << "} and accumulator value 0x" << hex << int(m_accumulator) << " set status register to 0b" << bitset<8>(m_statusRegister) << endl;
+    verboseString << "OR with value 0x" << hex << int(operand) << " and accumulator value 0x" << hex << int(m_accumulator) << " set status register to 0b" << bitset<8>(m_statusRegister) << endl;
     printVerbose(verboseString.str());
 }
 
