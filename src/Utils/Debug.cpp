@@ -219,6 +219,21 @@ void Debug::opcodeDebugOutput(uint8_t opcode, uint16_t programCounter, bool prin
     case Opcode::COMPARE_ZERO_PAGE_AND_INDEX_Y:
         opcodeDebugString = "<CPY zpg> - Compare Zero Page With Index X";
         break;
+    case Opcode::SHIFT_LEFT_ACCUMULATOR:
+        opcodeDebugString = "<ASL A> - Shift Left Accumulator";
+        break;
+    case Opcode::SHIFT_LEFT_ZERO_PAGE:
+        opcodeDebugString = "<ASL zpg> - Shift Left Zero Page";
+        break;
+    case Opcode::SHIFT_LEFT_ZERO_PAGE_X_INDEXED:
+        opcodeDebugString = "<ASL zpg,x> - Shift Left Zero Page X Indexed";
+        break;
+    case Opcode::SHIFT_LEFT_ABSOLUTE:
+        opcodeDebugString = "<ASL A> - Shift Left Absolute";
+        break;
+    case Opcode::SHIFT_LEFT_ABSOLUTE_X_INDEXED:
+        opcodeDebugString = "<ASL A> - Shift Left Absolute X Indexed";
+        break;
     case Opcode::UNKNOWN_OPCODE:
     default:
         opcodeDebugString = "Unknown Opcode";

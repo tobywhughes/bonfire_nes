@@ -187,6 +187,13 @@ void CPU::execute(Memory &memory, unsigned long int opcodesExecuted)
     case Opcode::COMPARE_ZERO_PAGE_AND_INDEX_Y:
         compareIndexY(memory, opcode);
         break;
+    case Opcode::SHIFT_LEFT_ACCUMULATOR:
+    case Opcode::SHIFT_LEFT_ZERO_PAGE:
+    case Opcode::SHIFT_LEFT_ZERO_PAGE_X_INDEXED:
+    case Opcode::SHIFT_LEFT_ABSOLUTE:
+    case Opcode::SHIFT_LEFT_ABSOLUTE_X_INDEXED:
+        shiftLeft(memory, opcode);
+        break;
     case Opcode::UNKNOWN_OPCODE:
     default:
         cout << T_ERROR << "Unimplemented Opcode: 0x" << hex << (int)opcode << endl;
@@ -893,6 +900,58 @@ void CPU::compareIndexY(Memory &memory, uint8_t opcode)
 
     ostringstream verboseString;
     verboseString << "Compare between index x 0x" << hex << int(m_yIndex) << " and value 0x" << hex << int(operand) << " set status register to 0x" << hex << int(m_statusRegister) << endl;
+    printVerbose(verboseString.str());
+}
+
+void CPU::shiftLeft(Memory &memory, uint8_t opcode)
+{
+    uint8_t value;
+    uint16_t destination;
+
+    switch (opcode)
+    {
+    case Opcode::SHIFT_LEFT_ACCUMULATOR:
+        value = m_accumulator;
+        break;
+    case Opcode::SHIFT_LEFT_ZERO_PAGE:
+        destination = getZeroPageAddress(memory);
+        value = memory.read8(destination);
+        break;
+    case Opcode::SHIFT_LEFT_ZERO_PAGE_X_INDEXED:
+        destination = getZeroPageAddressXIndexed(memory);
+        value = memory.read8(destination);
+        break;
+    case Opcode::SHIFT_LEFT_ABSOLUTE:
+        destination = getAbsoluteAddress(memory);
+        value = memory.read8(destination);
+        break;
+    case Opcode::SHIFT_LEFT_ABSOLUTE_X_INDEXED:
+        destination = getZeroPageAddressXIndexed(memory);
+        value = memory.read8(destination);
+        break;
+    default:
+        cout << T_ERROR << "Emulator Opcode Error - ASL Called On Invalid Opcode 0x" << hex << int(opcode) << endl;
+        exit(0);
+    }
+
+    bool carryBit = (value & 0b10000000) != 0;
+    value = value << 1;
+
+    if (opcode == Opcode::SHIFT_LEFT_ACCUMULATOR)
+    {
+        m_accumulator = value;
+    }
+    else
+    {
+        memory.write8(destination, value);
+    };
+
+    status_setZero(value != 0);
+    status_setNegative((value & 0b1000000) != 0);
+    status_setCarry(carryBit);
+
+    ostringstream verboseString;
+    verboseString << "Shift left resulted in value to 0x" << hex << int(value) << " and set status register to 0x" << hex << int(m_statusRegister) << endl;
     printVerbose(verboseString.str());
 }
 

@@ -84,6 +84,7 @@ private:
     void loadAccumulator(Memory &memory, uint8_t opcode);
     void compareIndexX(Memory &memory, uint8_t opcode);
     void compareIndexY(Memory &memory, uint8_t opcode);
+    void shiftLeft(Memory &memory, uint8_t opcode);
 
     // Memory Helpers
     uint8_t getAbsolute(Memory &memory);
