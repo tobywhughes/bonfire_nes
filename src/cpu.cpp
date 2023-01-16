@@ -194,6 +194,13 @@ void CPU::execute(Memory &memory, unsigned long int opcodesExecuted)
     case Opcode::SHIFT_LEFT_ABSOLUTE_X_INDEXED:
         shiftLeft(memory, opcode);
         break;
+    case Opcode::ROTATE_LEFT_ACCUMULATOR:
+    case Opcode::ROTATE_LEFT_ZERO_PAGE:
+    case Opcode::ROTATE_LEFT_ZERO_PAGE_X_INDEXED:
+    case Opcode::ROTATE_LEFT_ABSOLUTE:
+    case Opcode::ROTATE_LEFT_ABSOLUTE_X_INDEXED:
+        rotateLeft(memory, opcode);
+        break;
     case Opcode::UNKNOWN_OPCODE:
     default:
         cout << T_ERROR << "Unimplemented Opcode: 0x" << hex << (int)opcode << endl;
@@ -907,11 +914,13 @@ void CPU::shiftLeft(Memory &memory, uint8_t opcode)
 {
     uint8_t value;
     uint16_t destination;
+    bool setAccumulator = false;
 
     switch (opcode)
     {
     case Opcode::SHIFT_LEFT_ACCUMULATOR:
         value = m_accumulator;
+        setAccumulator = true;
         break;
     case Opcode::SHIFT_LEFT_ZERO_PAGE:
         destination = getZeroPageAddress(memory);
@@ -934,10 +943,66 @@ void CPU::shiftLeft(Memory &memory, uint8_t opcode)
         exit(0);
     }
 
+    value = shiftLeftOperation(memory, value, false, setAccumulator, destination);
+
+    ostringstream verboseString;
+    verboseString << "Shift left resulted in value to 0x" << hex << int(value) << " and set status register to 0x" << hex << int(m_statusRegister) << endl;
+    printVerbose(verboseString.str());
+}
+
+void CPU::rotateLeft(Memory &memory, uint8_t opcode)
+{
+    uint8_t value;
+    uint16_t destination;
+    bool setAccumulator = false;
+
+    switch (opcode)
+    {
+    case Opcode::ROTATE_LEFT_ACCUMULATOR:
+        value = m_accumulator;
+        setAccumulator = true;
+        break;
+    case Opcode::ROTATE_LEFT_ZERO_PAGE:
+        destination = getZeroPageAddress(memory);
+        value = memory.read8(destination);
+        break;
+    case Opcode::ROTATE_LEFT_ZERO_PAGE_X_INDEXED:
+        destination = getZeroPageAddressXIndexed(memory);
+        value = memory.read8(destination);
+        break;
+    case Opcode::ROTATE_LEFT_ABSOLUTE:
+        destination = getAbsoluteAddress(memory);
+        value = memory.read8(destination);
+        break;
+    case Opcode::ROTATE_LEFT_ABSOLUTE_X_INDEXED:
+        destination = getZeroPageAddressXIndexed(memory);
+        value = memory.read8(destination);
+        break;
+    default:
+        cout << T_ERROR << "Emulator Opcode Error - ROL Called On Invalid Opcode 0x" << hex << int(opcode) << endl;
+        exit(0);
+    }
+
+    bool carryStatus = status_getCarry();
+
+    value = shiftLeftOperation(memory, value, carryStatus, setAccumulator, destination);
+
+    ostringstream verboseString;
+    verboseString << "Rotate left resulted in value to 0x" << hex << int(value) << " and set status register to 0x" << hex << int(m_statusRegister) << endl;
+    printVerbose(verboseString.str());
+}
+
+uint8_t CPU::shiftLeftOperation(Memory memory, uint8_t value, bool withCarry, bool setAccumulator, uint16_t destination)
+{
     bool carryBit = (value & 0b10000000) != 0;
     value = value << 1;
 
-    if (opcode == Opcode::SHIFT_LEFT_ACCUMULATOR)
+    if (withCarry)
+    {
+        value = value | 0b00000001;
+    }
+
+    if (setAccumulator)
     {
         m_accumulator = value;
     }
@@ -950,9 +1015,7 @@ void CPU::shiftLeft(Memory &memory, uint8_t opcode)
     status_setNegative((value & 0b1000000) != 0);
     status_setCarry(carryBit);
 
-    ostringstream verboseString;
-    verboseString << "Shift left resulted in value to 0x" << hex << int(value) << " and set status register to 0x" << hex << int(m_statusRegister) << endl;
-    printVerbose(verboseString.str());
+    return value;
 }
 
 void CPU::subractImmediateWithBorrow(Memory &memory)

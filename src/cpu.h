@@ -85,6 +85,7 @@ private:
     void compareIndexX(Memory &memory, uint8_t opcode);
     void compareIndexY(Memory &memory, uint8_t opcode);
     void shiftLeft(Memory &memory, uint8_t opcode);
+    void rotateLeft(Memory &memory, uint8_t opcode);
 
     // Memory Helpers
     uint8_t getAbsolute(Memory &memory);
@@ -102,6 +103,7 @@ private:
 
     // Misc Utils
     void setCompareStatus(uint8_t registerValue, uint8_t operand, uint8_t result);
+    uint8_t shiftLeftOperation(Memory memory, uint8_t value, bool withCarry, bool setAccumulator, uint16_t destination);
 
 public:
     CPU();

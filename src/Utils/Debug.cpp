@@ -229,10 +229,25 @@ void Debug::opcodeDebugOutput(uint8_t opcode, uint16_t programCounter, bool prin
         opcodeDebugString = "<ASL zpg,x> - Shift Left Zero Page X Indexed";
         break;
     case Opcode::SHIFT_LEFT_ABSOLUTE:
-        opcodeDebugString = "<ASL A> - Shift Left Absolute";
+        opcodeDebugString = "<ASL abs> - Shift Left Absolute";
         break;
     case Opcode::SHIFT_LEFT_ABSOLUTE_X_INDEXED:
-        opcodeDebugString = "<ASL A> - Shift Left Absolute X Indexed";
+        opcodeDebugString = "<ASL abs,x> - Shift Left Absolute X Indexed";
+        break;
+    case Opcode::ROTATE_LEFT_ACCUMULATOR:
+        opcodeDebugString = "<ROL A> - Rotate Left Accumulator";
+        break;
+    case Opcode::ROTATE_LEFT_ZERO_PAGE:
+        opcodeDebugString = "<ROL zpg> - Rotate Left Zero Page";
+        break;
+    case Opcode::ROTATE_LEFT_ZERO_PAGE_X_INDEXED:
+        opcodeDebugString = "<ROL zpg,x> - Rotate Left Zero Page X Indexed";
+        break;
+    case Opcode::ROTATE_LEFT_ABSOLUTE:
+        opcodeDebugString = "<ROL abs> - Rotate Left Absolute";
+        break;
+    case Opcode::ROTATE_LEFT_ABSOLUTE_X_INDEXED:
+        opcodeDebugString = "<ROL abs,x> - Rotate Left Absolute X Indexed";
         break;
     case Opcode::UNKNOWN_OPCODE:
     default:
