@@ -123,7 +123,8 @@ void CPU::execute(Memory &memory, unsigned long int opcodesExecuted)
         returnFromSubroutine(memory);
         break;
     case Opcode::ABSOLUTE_BITWISE_TEST:
-        absoluteBitwiseTest(memory);
+    case Opcode::ZERO_PAGE_BITWISE_TEST:
+        bitwiseTest(memory, opcode);
         break;
     case Opcode::PUSH_ACCUMULATOR_TO_STACK:
         pushAccumulatorToStack(memory);
@@ -738,22 +739,33 @@ void CPU::returnFromSubroutine(Memory &memory)
     printVerbose(verboseString.str());
 }
 
-void CPU::absoluteBitwiseTest(Memory &memory)
+void CPU::bitwiseTest(Memory &memory, uint8_t opcode)
 {
-    uint16_t absoluteAddress = memory.read16(m_programCounter);
-    m_programCounter += 2;
+    uint8_t operand;
 
-    uint8_t memoryValue = memory.read8(absoluteAddress);
-    uint8_t resultValue = memoryValue & m_accumulator;
+    switch (opcode)
+    {
+    case Opcode::ZERO_PAGE_BITWISE_TEST:
+        operand = getZeroPage(memory);
+        break;
+    case Opcode::ABSOLUTE_BITWISE_TEST:
+        operand = getAbsolute(memory);
+        break;
+    default:
+        cout << T_ERROR << "Emulator Opcode Error - BIT Called On Invalid Opcode 0x" << hex << int(opcode) << endl;
+        exit(0);
+    }
+
+    uint8_t resultValue = operand & m_accumulator;
 
     // Accumulator only affects zero flag
     // Other to status flags are based on the value read from memory
     status_setZero(resultValue == 0);
-    status_setNegative((memoryValue & 0b10000000) != 0);
-    status_setOverflow((memoryValue & 0b01000000) != 0);
+    status_setNegative((operand & 0b10000000) != 0);
+    status_setOverflow((operand & 0b01000000) != 0);
 
     ostringstream verboseString;
-    verboseString << "Bitwise Test with value 0x" << hex << int(resultValue) << " from absolute address {0x" << hex << int(absoluteAddress) << "} set status register to 0b" << bitset<8>(m_statusRegister);
+    verboseString << "Bitwise Test with value 0x" << hex << int(resultValue) << " set status register to 0b" << bitset<8>(m_statusRegister);
     printVerbose(verboseString.str());
 }
 

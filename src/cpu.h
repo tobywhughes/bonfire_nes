@@ -62,7 +62,6 @@ private:
     void incrementIndexY();
     void incrementZeroPagedAddress(Memory &memory);
     void returnFromSubroutine(Memory &memory);
-    void absoluteBitwiseTest(Memory &memory);
     void pushAccumulatorToStack(Memory &memory);
     void pullAccumulatorFromStack(Memory &memory);
     void pullStatusFromStack(Memory &memory);
@@ -86,6 +85,7 @@ private:
     void shiftLeft(Memory &memory, uint8_t opcode);
     void rotateLeft(Memory &memory, uint8_t opcode);
     void orMemoryWithAccumulator(Memory &memory, uint8_t opcode);
+    void bitwiseTest(Memory &memory, uint8_t opcode);
 
     // Memory Helpers
     uint8_t getAbsolute(Memory &memory);

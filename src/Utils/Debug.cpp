@@ -120,6 +120,9 @@ void Debug::opcodeDebugOutput(uint8_t opcode, uint16_t programCounter, bool prin
     case Opcode::ABSOLUTE_BITWISE_TEST:
         opcodeDebugString = "<BIT abs> - Absolute Bitwise Test";
         break;
+    case Opcode::ZERO_PAGE_BITWISE_TEST:
+        opcodeDebugString = "<BIT zpg> - Zero Page Bitwise Test";
+        break;
     case Opcode::OR_MEMORY_WITH_ACCUMULATOR_IMMEDIATE:
         opcodeDebugString = "<ORA imm> - Or accumulator with immediate";
         break;
