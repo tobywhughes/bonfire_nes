@@ -95,11 +95,15 @@ private:
     uint8_t getZeroPage(Memory &memory);
     uint8_t getZeroPageXIndexed(Memory &memory);
     uint8_t getZeroPageYIndexed(Memory &memory);
+    uint8_t getIndirectYIndexed(Memory &memory);
+    uint8_t getIndirectXIndexed(Memory &memory);
 
     uint16_t getAbsoluteAddress(Memory &memory);
     uint16_t getZeroPageAddress(Memory &memory);
     uint16_t getZeroPageAddressXIndexed(Memory &memory);
     uint16_t getZeroPageAddressYIndexed(Memory &memory);
+    uint16_t getIndirectYIndexedAddress(Memory &memory);
+    uint16_t getIndirectXIndexedAddress(Memory &memory);
 
     // Misc Utils
     void setCompareStatus(uint8_t registerValue, uint8_t operand, uint8_t result);

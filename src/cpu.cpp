@@ -172,6 +172,8 @@ void CPU::execute(Memory &memory, unsigned long int opcodesExecuted)
     case Opcode::LOAD_ACCUMULATOR_ZERO_PAGE_X_INDEXED:
     case Opcode::LOAD_ACCUMULATOR_WITH_ABSOLUTE_X_INDEXED:
     case Opcode::LOAD_ACCUMULATOR_WITH_ABSOLUTE_Y_INDEXED:
+    case Opcode::LOAD_ACCUMULATOR_WITH_INDIRECT_X_INDEXED:
+    case Opcode::LOAD_ACCUMULATOR_WITH_INDIRECT_Y_INDEXED:
         loadAccumulator(memory, opcode);
         break;
     case Opcode::COMPARE_IMMEDIATE_AND_INDEX_X:
@@ -317,23 +319,12 @@ void CPU::storeIndexX(Memory &memory, uint8_t opcode)
 
 void CPU::storeAccumulatorAtIndirectYIndexed(Memory &memory)
 {
-    uint8_t operand = memory.read8(m_programCounter);
-    m_programCounter += 1;
+    uint16_t loopupAddress = getIndirectYIndexedAddress(memory);
 
-    uint16_t zeroPagedInitialLookupAddress = 0x0000 | operand;
-
-    uint16_t lookupValue = memory.read16(zeroPagedInitialLookupAddress);
-    uint8_t lookupValueLow = (uint8_t)(0x00FF & lookupValue);
-
-    lookupValue &= 0xFF00;
-    lookupValueLow += m_yIndex;
-
-    lookupValue |= lookupValueLow;
-
-    memory.write8(lookupValue, m_accumulator);
+    memory.write8(loopupAddress, m_accumulator);
 
     ostringstream verboseString;
-    verboseString << "Storing Accumulator value 0x" << hex << int(m_accumulator) << " at address {0x" << hex << int(lookupValue) << "}";
+    verboseString << "Storing Accumulator value 0x" << hex << int(m_accumulator) << " at address {0x" << hex << int(loopupAddress) << "}";
     printVerbose(verboseString.str());
 }
 
@@ -460,6 +451,12 @@ void CPU::loadAccumulator(Memory &memory, uint8_t opcode)
         break;
     case Opcode::LOAD_ACCUMULATOR_WITH_ABSOLUTE_Y_INDEXED:
         resultValue = getAbsoluteYIndexed(memory);
+        break;
+    case Opcode::LOAD_ACCUMULATOR_WITH_INDIRECT_X_INDEXED:
+        resultValue = getIndirectXIndexed(memory);
+        break;
+    case Opcode::LOAD_ACCUMULATOR_WITH_INDIRECT_Y_INDEXED:
+        resultValue = getIndirectYIndexed(memory);
         break;
     default:
         cout << T_ERROR << "Emulator Opcode Error - LDA Called Invalid Opcode 0x" << hex << int(opcode) << endl;
@@ -1330,6 +1327,38 @@ uint16_t CPU::getZeroPageAddressYIndexed(Memory &memory)
     zeroPageOffset += m_yIndex;
 
     return 0x0000 | zeroPageOffset;
+}
+
+uint16_t CPU::getIndirectYIndexedAddress(Memory &memory)
+{
+    uint8_t zeroPageOffset = getImmediate(memory);
+    uint16_t lookupAddress = memory.read16(0x0000 | zeroPageOffset);
+
+    lookupAddress += m_yIndex;
+
+    return lookupAddress;
+}
+
+uint16_t CPU::getIndirectXIndexedAddress(Memory &memory)
+{
+    uint8_t zeroPageOffset = getImmediate(memory);
+    zeroPageOffset += m_xIndex;
+
+    return memory.read16(0x0000 | zeroPageOffset);
+}
+
+uint8_t CPU::getIndirectYIndexed(Memory &memory)
+{
+    uint16_t lookupAddress = getIndirectYIndexedAddress(memory);
+
+    return memory.read8(lookupAddress);
+}
+
+uint8_t CPU::getIndirectXIndexed(Memory &memory)
+{
+    uint16_t lookupAddress = getIndirectXIndexedAddress(memory);
+
+    return memory.read8(lookupAddress);
 }
 
 void CPU::setCompareStatus(uint8_t registerValue, uint8_t operand, uint8_t result)
