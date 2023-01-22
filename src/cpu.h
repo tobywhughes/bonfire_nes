@@ -85,6 +85,7 @@ private:
     void shiftLeft(Memory &memory, uint8_t opcode);
     void rotateLeft(Memory &memory, uint8_t opcode);
     void orMemoryWithAccumulator(Memory &memory, uint8_t opcode);
+    void exlusiveOrMemoryWithAccumulator(Memory &memory, uint8_t opcode);
     void bitwiseTest(Memory &memory, uint8_t opcode);
 
     // Memory Helpers

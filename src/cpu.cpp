@@ -209,6 +209,16 @@ void CPU::execute(Memory &memory, unsigned long int opcodesExecuted)
     case Opcode::OR_MEMORY_WITH_ACCUMULATOR_ABSOLUTE_Y_INDEXED:
         orMemoryWithAccumulator(memory, opcode);
         break;
+    case Opcode::EXCLUSIVE_OR_MEMORY_WITH_ACCUMULATOR_IMMEDIATE:
+    case Opcode::EXCLUSIVE_OR_MEMORY_WITH_ACCUMULATOR_ZERO_PAGE:
+    case Opcode::EXCLUSIVE_OR_MEMORY_WITH_ACCUMULATOR_ZERO_PAGE_X_INDEXED:
+    case Opcode::EXCLUSIVE_OR_MEMORY_WITH_ACCUMULATOR_ABSOLUTE:
+    case Opcode::EXCLUSIVE_OR_MEMORY_WITH_ACCUMULATOR_ABSOLUTE_X_INDEXED:
+    case Opcode::EXCLUSIVE_OR_MEMORY_WITH_ACCUMULATOR_ABSOLUTE_Y_INDEXED:
+    case Opcode::EXCLUSIVE_OR_MEMORY_WITH_ACCUMULATOR_INDIRECT_X_INDEXED:
+    case Opcode::EXCLUSIVE_OR_MEMORY_WITH_ACCUMULATOR_INDIRECT_Y_INDEXED:
+        exlusiveOrMemoryWithAccumulator(memory, opcode);
+        break;
     case Opcode::UNKNOWN_OPCODE:
     default:
         cout << T_ERROR << "Unimplemented Opcode: 0x" << hex << (int)opcode << endl;
@@ -807,6 +817,53 @@ void CPU::orMemoryWithAccumulator(Memory &memory, uint8_t opcode)
 
     ostringstream verboseString;
     verboseString << "OR with value 0x" << hex << int(operand) << " and accumulator value 0x" << hex << int(m_accumulator) << " set status register to 0b" << bitset<8>(m_statusRegister) << endl;
+    printVerbose(verboseString.str());
+}
+
+void CPU::exlusiveOrMemoryWithAccumulator(Memory &memory, uint8_t opcode)
+{
+    uint8_t operand;
+
+    switch (opcode)
+    {
+    case Opcode::EXCLUSIVE_OR_MEMORY_WITH_ACCUMULATOR_IMMEDIATE:
+        operand = getImmediate(memory);
+        break;
+    case Opcode::EXCLUSIVE_OR_MEMORY_WITH_ACCUMULATOR_ZERO_PAGE:
+        operand = getZeroPage(memory);
+        break;
+    case Opcode::EXCLUSIVE_OR_MEMORY_WITH_ACCUMULATOR_ZERO_PAGE_X_INDEXED:
+        operand = getZeroPageXIndexed(memory);
+        break;
+    case Opcode::EXCLUSIVE_OR_MEMORY_WITH_ACCUMULATOR_ABSOLUTE:
+        operand = getAbsolute(memory);
+        break;
+    case Opcode::EXCLUSIVE_OR_MEMORY_WITH_ACCUMULATOR_ABSOLUTE_X_INDEXED:
+        operand = getAbsoluteXIndexed(memory);
+        break;
+    case Opcode::EXCLUSIVE_OR_MEMORY_WITH_ACCUMULATOR_ABSOLUTE_Y_INDEXED:
+        operand = getAbsoluteYIndexed(memory);
+        break;
+    case Opcode::EXCLUSIVE_OR_MEMORY_WITH_ACCUMULATOR_INDIRECT_X_INDEXED:
+        operand = getIndirectXIndexed(memory);
+        break;
+    case Opcode::EXCLUSIVE_OR_MEMORY_WITH_ACCUMULATOR_INDIRECT_Y_INDEXED:
+        operand = getIndirectYIndexed(memory);
+        break;
+    default:
+        cout << T_ERROR << "Emulator Opcode Error - ORA Called On Invalid Opcode 0x" << hex << int(opcode) << endl;
+        exit(0);
+    }
+
+    uint8_t resultValue = operand ^ m_accumulator;
+
+    m_accumulator = resultValue;
+
+    status_setZero(resultValue == 0);
+    status_setNegative((resultValue & 0b10000000) != 0);
+
+    ostringstream verboseString;
+    verboseString << "EOR with value 0x" << hex << int(operand) << " and accumulator value 0x" << hex << int(m_accumulator) << " set status register to 0b" << bitset<8>(m_statusRegister) << endl;
     printVerbose(verboseString.str());
 }
 

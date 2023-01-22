@@ -26,7 +26,6 @@ void Debug::opcodeDebugOutput(uint8_t opcode, uint16_t programCounter, bool prin
     case Opcode::STORE_ACCUMULATOR_AT_ABSOLUTE_X_INDEXED:
         opcodeDebugString = "<STA abs,X> - Store Accumulator At Absolute Address X-Indexed";
         break;
-
     case Opcode::CLEAR_DECIMAL_MODE:
         opcodeDebugString = "<CLD> - Clear Decimal Mode";
         break;
@@ -266,6 +265,30 @@ void Debug::opcodeDebugOutput(uint8_t opcode, uint16_t programCounter, bool prin
         break;
     case Opcode::ROTATE_LEFT_ABSOLUTE_X_INDEXED:
         opcodeDebugString = "<ROL abs,x> - Rotate Left Absolute X Indexed";
+        break;
+    case Opcode::EXCLUSIVE_OR_MEMORY_WITH_ACCUMULATOR_IMMEDIATE:
+        opcodeDebugString = "<EOR imm> - Exclusive Or With Immediate";
+        break;
+    case Opcode::EXCLUSIVE_OR_MEMORY_WITH_ACCUMULATOR_ZERO_PAGE:
+        opcodeDebugString = "<EOR zpg> - Exclusive Or With Zero Page";
+        break;
+    case Opcode::EXCLUSIVE_OR_MEMORY_WITH_ACCUMULATOR_ZERO_PAGE_X_INDEXED:
+        opcodeDebugString = "<EOR zpg,x> - Exclusive Or With Zero Page X Indexed";
+        break;
+    case Opcode::EXCLUSIVE_OR_MEMORY_WITH_ACCUMULATOR_ABSOLUTE:
+        opcodeDebugString = "<EOR abs> - Exclusive Or With Absolute";
+        break;
+    case Opcode::EXCLUSIVE_OR_MEMORY_WITH_ACCUMULATOR_ABSOLUTE_X_INDEXED:
+        opcodeDebugString = "<EOR abs,x> - Exclusive Or With Absolute X Indexed";
+        break;
+    case Opcode::EXCLUSIVE_OR_MEMORY_WITH_ACCUMULATOR_ABSOLUTE_Y_INDEXED:
+        opcodeDebugString = "<EOR abs,y> - Exclusive Or With Absolute u Indexed";
+        break;
+    case Opcode::EXCLUSIVE_OR_MEMORY_WITH_ACCUMULATOR_INDIRECT_X_INDEXED:
+        opcodeDebugString = "<EOR (d),x> - Exclusive Or With Indirect X Indexed";
+        break;
+    case Opcode::EXCLUSIVE_OR_MEMORY_WITH_ACCUMULATOR_INDIRECT_Y_INDEXED:
+        opcodeDebugString = "<EOR (d),y> - Exclusive Or With Indirect Y Indexed";
         break;
     case Opcode::UNKNOWN_OPCODE:
     default:
