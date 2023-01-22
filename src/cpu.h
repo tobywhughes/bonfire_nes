@@ -60,7 +60,6 @@ private:
     void pullAccumulatorFromStack(Memory &memory);
     void pullStatusFromStack(Memory &memory);
     void pushStatusToStack(Memory &memory);
-    void compareWithImmediate(Memory &memory);
     void subractImmediateWithBorrow(Memory &memory);
     void addImmediateWithBorrow(Memory &memory);
     void shiftRightAccumulator();
@@ -78,6 +77,7 @@ private:
     void loadAccumulator(Memory &memory, uint8_t opcode);
     void compareIndexX(Memory &memory, uint8_t opcode);
     void compareIndexY(Memory &memory, uint8_t opcode);
+    void compareAccumulator(Memory &memory, uint8_t opcode);
     void shiftLeft(Memory &memory, uint8_t opcode);
     void rotateLeft(Memory &memory, uint8_t opcode);
     void rotateRight(Memory &memory, uint8_t opcode);

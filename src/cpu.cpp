@@ -134,9 +134,6 @@ void CPU::execute(Memory &memory, unsigned long int opcodesExecuted)
     case Opcode::PUSH_STATUS_TO_STACK:
         pushStatusToStack(memory);
         break;
-    case Opcode::COMPARE_WITH_IMMEDIATE:
-        compareWithImmediate(memory);
-        break;
     case Opcode::SUBRACT_IMMEDIATE_WITH_BORROW:
         subractImmediateWithBorrow(memory);
         break;
@@ -182,6 +179,16 @@ void CPU::execute(Memory &memory, unsigned long int opcodesExecuted)
     case Opcode::COMPARE_ABSOLUTE_AND_INDEX_Y:
     case Opcode::COMPARE_ZERO_PAGE_AND_INDEX_Y:
         compareIndexY(memory, opcode);
+        break;
+    case Opcode::COMPARE_IMMEDIATE_AND_ACCUMULATOR:
+    case Opcode::COMPARE_ZERO_PAGE_AND_ACCUMULATOR:
+    case Opcode::COMPARE_ZERO_PAGE_X_INDEXED_AND_ACCUMULATOR:
+    case Opcode::COMPARE_ABSOLUTE_AND_ACCUMULATOR:
+    case Opcode::COMPARE_ABSOLUTE_X_INDEXED_AND_ACCUMULATOR:
+    case Opcode::COMPARE_ABSOLUTE_Y_INDEXEDAND_ACCUMULATOR:
+    case Opcode::COMPARE_INDIRECT_X_INDEXED_AND_ACCUMULATOR:
+    case Opcode::COMPARE_INDIRECT_Y_INDEXED_AND_ACCUMULATOR:
+        compareAccumulator(memory, opcode);
         break;
     case Opcode::SHIFT_LEFT_ACCUMULATOR:
     case Opcode::SHIFT_LEFT_ZERO_PAGE:
@@ -924,19 +931,6 @@ void CPU::pullStatusFromStack(Memory &memory)
     printVerbose(verboseString.str());
 }
 
-void CPU::compareWithImmediate(Memory &memory)
-{
-    uint8_t immediateValue = memory.read8(m_programCounter);
-    m_programCounter += 1;
-
-    uint8_t result = m_accumulator - immediateValue;
-    setCompareStatus(m_accumulator, immediateValue, result);
-
-    ostringstream verboseString;
-    verboseString << "Compare between accumulator 0x" << hex << int(m_accumulator) << " and immediate value 0x" << hex << int(immediateValue) << " set status register to 0x" << hex << int(m_statusRegister) << endl;
-    printVerbose(verboseString.str());
-}
-
 void CPU::compareIndexX(Memory &memory, uint8_t opcode)
 {
     uint8_t operand;
@@ -990,6 +984,49 @@ void CPU::compareIndexY(Memory &memory, uint8_t opcode)
 
     ostringstream verboseString;
     verboseString << "Compare between index x 0x" << hex << int(m_yIndex) << " and value 0x" << hex << int(operand) << " set status register to 0x" << hex << int(m_statusRegister) << endl;
+    printVerbose(verboseString.str());
+}
+
+void CPU::compareAccumulator(Memory &memory, uint8_t opcode)
+{
+    uint8_t operand;
+
+    switch (opcode)
+    {
+    case Opcode::COMPARE_IMMEDIATE_AND_ACCUMULATOR:
+        operand = getImmediate(memory);
+        break;
+    case Opcode::COMPARE_ZERO_PAGE_AND_ACCUMULATOR:
+        operand = getZeroPage(memory);
+
+    case Opcode::COMPARE_ZERO_PAGE_X_INDEXED_AND_ACCUMULATOR:
+        operand = getZeroPageXIndexed(memory);
+        break;
+    case Opcode::COMPARE_ABSOLUTE_AND_ACCUMULATOR:
+        operand = getAbsolute(memory);
+        break;
+    case Opcode::COMPARE_ABSOLUTE_X_INDEXED_AND_ACCUMULATOR:
+        operand = getAbsoluteXIndexed(memory);
+        break;
+    case Opcode::COMPARE_ABSOLUTE_Y_INDEXEDAND_ACCUMULATOR:
+        operand = getAbsoluteYIndexed(memory);
+        break;
+    case Opcode::COMPARE_INDIRECT_X_INDEXED_AND_ACCUMULATOR:
+        operand = getIndirectXIndexed(memory);
+        break;
+    case Opcode::COMPARE_INDIRECT_Y_INDEXED_AND_ACCUMULATOR:
+        operand = getIndirectYIndexed(memory);
+        break;
+    default:
+        cout << T_ERROR << "Emulator Opcode Error - CMP Called On Invalid Opcode 0x" << hex << int(opcode) << endl;
+        exit(0);
+    }
+
+    uint8_t result = m_accumulator - operand;
+    setCompareStatus(m_accumulator, operand, result);
+
+    ostringstream verboseString;
+    verboseString << "Compare between accumulator 0x" << hex << int(m_accumulator) << " and value 0x" << hex << int(operand) << " set status register to 0x" << hex << int(m_statusRegister) << endl;
     printVerbose(verboseString.str());
 }
 
