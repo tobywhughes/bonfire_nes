@@ -32,6 +32,9 @@ void Debug::opcodeDebugOutput(uint8_t opcode, uint16_t programCounter, bool prin
     case Opcode::STORE_ACCUMULATOR_AT_ABSOLUTE_X_INDEXED:
         opcodeDebugString = "<STA abs,X> - Store Accumulator At Absolute Address X-Indexed";
         break;
+    case Opcode::STORE_ACCUMULATOR_AT_ABSOLUTE_Y_INDEXED:
+        opcodeDebugString = "<STA abs,Y> - Store Accumulator At Absolute Address Y-Indexed";
+        break;
     case Opcode::CLEAR_DECIMAL_MODE:
         opcodeDebugString = "<CLD> - Clear Decimal Mode";
         break;
@@ -87,6 +90,9 @@ void Debug::opcodeDebugOutput(uint8_t opcode, uint16_t programCounter, bool prin
         opcodeDebugString = "<STA d> - Store Accumulator At Zero Page Address";
         break;
     case Opcode::STORE_ACCUMULATOR_AT_INDIRECT_Y_INDEXED:
+        opcodeDebugString = "<STA (d),y> - Store Accumulator At indirect y-indexed";
+        break;
+    case Opcode::STORE_ACCUMULATOR_AT_INDIRECT_X_INDEXED:
         opcodeDebugString = "<STA (d),y> - Store Accumulator At indirect y-indexed";
         break;
     case Opcode::STORE_ACCUMULATOR_AT_ZEROPAGE_X_INDEXED:
@@ -271,6 +277,21 @@ void Debug::opcodeDebugOutput(uint8_t opcode, uint16_t programCounter, bool prin
         break;
     case Opcode::ROTATE_LEFT_ABSOLUTE_X_INDEXED:
         opcodeDebugString = "<ROL abs,x> - Rotate Left Absolute X Indexed";
+        break;
+    case Opcode::ROTATE_RIGHT_ACCUMULATOR:
+        opcodeDebugString = "<ROR A> - Rotate Right Accumulator";
+        break;
+    case Opcode::ROTATE_RIGHT_ZERO_PAGE:
+        opcodeDebugString = "<ROR zpg> - Rotate Right Zero Page";
+        break;
+    case Opcode::ROTATE_RIGHT_ZERO_PAGE_X_INDEXED:
+        opcodeDebugString = "<ROR zpg,x> - Rotate Right Zero Page X Indexed";
+        break;
+    case Opcode::ROTATE_RIGHT_ABSOLUTE:
+        opcodeDebugString = "<ROR abs> - Rotate Right Absolute";
+        break;
+    case Opcode::ROTATE_RIGHT_ABSOLUTE_X_INDEXED:
+        opcodeDebugString = "<ROR abs,x> - Rotate Right Absolute X Indexed";
         break;
     case Opcode::EXCLUSIVE_OR_MEMORY_WITH_ACCUMULATOR_IMMEDIATE:
         opcodeDebugString = "<EOR imm> - Exclusive Or With Immediate";

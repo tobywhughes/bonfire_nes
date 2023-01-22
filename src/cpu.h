@@ -44,8 +44,6 @@ private:
     // Opcode Handlers
     void jumpAbsolute(Memory &memory);
     void printVerbose(std::string verboseString);
-    void storeAccumulatorAtAbsolute(Memory &memory);
-    void storeAccumulatorAtAbsoluteXIndexed(Memory &memory);
     void transferIndexXToStackPointer();
     void transferAccumulatorToIndexX();
     void transferAccumulatorToIndexY();
@@ -55,9 +53,6 @@ private:
     void decrementIndexX();
     void decrementIndexY();
     void jumpAbsoluteSaveReturn(Memory &memory);
-    void storeAccumulatorAtZeroPage(Memory &memory);
-    void storeAccumulatorAtIndirectYIndexed(Memory &memory);
-    void storeAccumulatorAtZeroPageXIndex(Memory &memory);
     void incrementIndexY();
     void incrementZeroPagedAddress(Memory &memory);
     void returnFromSubroutine(Memory &memory);
@@ -79,11 +74,13 @@ private:
     void loadIndexY(Memory &memory, uint8_t opcode);
     void storeIndexY(Memory &memory, uint8_t opcode);
     void storeIndexX(Memory &memory, uint8_t opcode);
+    void storeAccumulator(Memory &memory, uint8_t opcode);
     void loadAccumulator(Memory &memory, uint8_t opcode);
     void compareIndexX(Memory &memory, uint8_t opcode);
     void compareIndexY(Memory &memory, uint8_t opcode);
     void shiftLeft(Memory &memory, uint8_t opcode);
     void rotateLeft(Memory &memory, uint8_t opcode);
+    void rotateRight(Memory &memory, uint8_t opcode);
     void orMemoryWithAccumulator(Memory &memory, uint8_t opcode);
     void exlusiveOrMemoryWithAccumulator(Memory &memory, uint8_t opcode);
     void bitwiseTest(Memory &memory, uint8_t opcode);
@@ -100,6 +97,8 @@ private:
     uint8_t getIndirectXIndexed(Memory &memory);
 
     uint16_t getAbsoluteAddress(Memory &memory);
+    uint16_t getAbsoluteAddressXIndexed(Memory &memory);
+    uint16_t getAbsoluteAddressYIndexed(Memory &memory);
     uint16_t getZeroPageAddress(Memory &memory);
     uint16_t getZeroPageAddressXIndexed(Memory &memory);
     uint16_t getZeroPageAddressYIndexed(Memory &memory);
@@ -109,6 +108,7 @@ private:
     // Misc Utils
     void setCompareStatus(uint8_t registerValue, uint8_t operand, uint8_t result);
     uint8_t shiftLeftOperation(Memory memory, uint8_t value, bool withCarry, bool setAccumulator, uint16_t destination);
+    uint8_t shiftRightOperation(Memory memory, uint8_t value, bool withCarry, bool setAccumulator, uint16_t destination);
 
 public:
     CPU();

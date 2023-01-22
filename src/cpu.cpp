@@ -53,12 +53,6 @@ void CPU::execute(Memory &memory, unsigned long int opcodesExecuted)
     case Opcode::JUMP_ABSOLUTE:
         jumpAbsolute(memory);
         break;
-    case Opcode::STORE_ACCUMULATOR_AT_ABSOLUTE:
-        storeAccumulatorAtAbsolute(memory);
-        break;
-    case Opcode::STORE_ACCUMULATOR_AT_ABSOLUTE_X_INDEXED:
-        storeAccumulatorAtAbsoluteXIndexed(memory);
-        break;
     case Opcode::TRANSFER_INDEX_X_TO_STACK_POINTER:
         transferIndexXToStackPointer();
         break;
@@ -100,13 +94,13 @@ void CPU::execute(Memory &memory, unsigned long int opcodesExecuted)
         storeIndexX(memory, opcode);
         break;
     case Opcode::STORE_ACCUMULATOR_AT_ZERO_PAGE:
-        storeAccumulatorAtZeroPage(memory);
-        break;
-    case Opcode::STORE_ACCUMULATOR_AT_INDIRECT_Y_INDEXED:
-        storeAccumulatorAtIndirectYIndexed(memory);
-        break;
     case Opcode::STORE_ACCUMULATOR_AT_ZEROPAGE_X_INDEXED:
-        storeAccumulatorAtZeroPageXIndex(memory);
+    case Opcode::STORE_ACCUMULATOR_AT_ABSOLUTE:
+    case Opcode::STORE_ACCUMULATOR_AT_ABSOLUTE_X_INDEXED:
+    case Opcode::STORE_ACCUMULATOR_AT_ABSOLUTE_Y_INDEXED:
+    case Opcode::STORE_ACCUMULATOR_AT_INDIRECT_X_INDEXED:
+    case Opcode::STORE_ACCUMULATOR_AT_INDIRECT_Y_INDEXED:
+        storeAccumulator(memory, opcode);
         break;
     case Opcode::BRANCH_ON_ZERO_CLEAR:
     case Opcode::BRANCH_ON_ZERO_SET:
@@ -203,6 +197,13 @@ void CPU::execute(Memory &memory, unsigned long int opcodesExecuted)
     case Opcode::ROTATE_LEFT_ABSOLUTE_X_INDEXED:
         rotateLeft(memory, opcode);
         break;
+    case Opcode::ROTATE_RIGHT_ACCUMULATOR:
+    case Opcode::ROTATE_RIGHT_ZERO_PAGE:
+    case Opcode::ROTATE_RIGHT_ZERO_PAGE_X_INDEXED:
+    case Opcode::ROTATE_RIGHT_ABSOLUTE:
+    case Opcode::ROTATE_RIGHT_ABSOLUTE_X_INDEXED:
+        rotateRight(memory, opcode);
+        break;
     case Opcode::OR_MEMORY_WITH_ACCUMULATOR_IMMEDIATE:
     case Opcode::OR_MEMORY_WITH_ACCUMULATOR_ZERO_PAGE:
     case Opcode::OR_MEMORY_WITH_ACCUMULATOR_ZERO_PAGE_X_INDEXED:
@@ -240,33 +241,6 @@ void CPU::jumpAbsolute(Memory &memory)
     printVerbose(verboseString.str());
 
     m_programCounter = absoluteAddress;
-}
-
-void CPU::storeAccumulatorAtAbsolute(Memory &memory)
-{
-    uint16_t absoluteAddress = memory.read16(m_programCounter);
-    m_programCounter += 2;
-
-    memory.write8(absoluteAddress, m_accumulator);
-
-    ostringstream verboseString;
-    verboseString << "Storing Accumulator value 0x" << hex << int(m_accumulator) << " at address {0x" << hex << int(absoluteAddress) << "}";
-    printVerbose(verboseString.str());
-}
-
-void CPU::storeAccumulatorAtAbsoluteXIndexed(Memory &memory)
-{
-    uint16_t absoluteAddress = memory.read16(m_programCounter);
-
-    m_programCounter += 2;
-
-    absoluteAddress += m_xIndex;
-
-    memory.write8(absoluteAddress, m_accumulator);
-
-    ostringstream verboseString;
-    verboseString << "Storing Accumulator value 0x" << hex << int(m_accumulator) << " at address {0x" << hex << int(absoluteAddress) << "}";
-    printVerbose(verboseString.str());
 }
 
 void CPU::storeIndexY(Memory &memory, uint8_t opcode)
@@ -321,42 +295,41 @@ void CPU::storeIndexX(Memory &memory, uint8_t opcode)
     printVerbose(verboseString.str());
 }
 
-void CPU::storeAccumulatorAtIndirectYIndexed(Memory &memory)
+void CPU::storeAccumulator(Memory &memory, uint8_t opcode)
 {
-    uint16_t loopupAddress = getIndirectYIndexedAddress(memory);
+    uint16_t address;
+    switch (opcode)
+    {
+    case Opcode::STORE_ACCUMULATOR_AT_ZERO_PAGE:
+        address = getZeroPageAddress(memory);
+        break;
+    case Opcode::STORE_ACCUMULATOR_AT_ZEROPAGE_X_INDEXED:
+        address = getZeroPageAddressXIndexed(memory);
+        break;
+    case Opcode::STORE_ACCUMULATOR_AT_ABSOLUTE:
+        address = getAbsoluteAddress(memory);
+        break;
+    case Opcode::STORE_ACCUMULATOR_AT_ABSOLUTE_X_INDEXED:
+        address = getAbsoluteAddressXIndexed(memory);
+        break;
+    case Opcode::STORE_ACCUMULATOR_AT_ABSOLUTE_Y_INDEXED:
+        address = getAbsoluteAddressYIndexed(memory);
+        break;
+    case Opcode::STORE_ACCUMULATOR_AT_INDIRECT_X_INDEXED:
+        address = getIndirectXIndexedAddress(memory);
+        break;
+    case Opcode::STORE_ACCUMULATOR_AT_INDIRECT_Y_INDEXED:
+        address = getIndirectYIndexedAddress(memory);
+        break;
+    default:
+        cout << T_ERROR << "Emulator Opcode Error - STA Called Invalid Opcode 0x" << hex << int(opcode) << endl;
+        exit(0);
+    }
 
-    memory.write8(loopupAddress, m_accumulator);
+    memory.write8(address, m_accumulator);
 
     ostringstream verboseString;
-    verboseString << "Storing Accumulator value 0x" << hex << int(m_accumulator) << " at address {0x" << hex << int(loopupAddress) << "}";
-    printVerbose(verboseString.str());
-}
-
-void CPU::storeAccumulatorAtZeroPageXIndex(Memory &memory)
-{
-    uint8_t operand = memory.read8(m_programCounter);
-    m_programCounter += 1;
-
-    operand += m_xIndex;
-
-    memory.write8((uint16_t)operand, m_accumulator);
-
-    ostringstream verboseString;
-    verboseString << "Storing Accumulator value 0x" << hex << int(m_accumulator) << " at address {0x" << hex << int((uint16_t)operand) << "}";
-    printVerbose(verboseString.str());
-}
-
-void CPU::storeAccumulatorAtZeroPage(Memory &memory)
-{
-    uint8_t address = memory.read8(m_programCounter);
-    m_programCounter += 1;
-
-    uint16_t zeroPagedAddress = 0x0000 | address;
-
-    memory.write8(zeroPagedAddress, m_accumulator);
-
-    ostringstream verboseString;
-    verboseString << "Storing Index X value 0x" << hex << int(m_accumulator) << " at zero page address {0x" << hex << int(zeroPagedAddress) << "}";
+    verboseString << "Storing Accumulator value 0x" << hex << int(m_xIndex) << " at address {0x" << hex << int(address) << "}";
     printVerbose(verboseString.str());
 }
 
@@ -1102,6 +1075,48 @@ void CPU::rotateLeft(Memory &memory, uint8_t opcode)
     printVerbose(verboseString.str());
 }
 
+void CPU::rotateRight(Memory &memory, uint8_t opcode)
+{
+    uint8_t value;
+    uint16_t destination;
+    bool setAccumulator = false;
+
+    switch (opcode)
+    {
+    case Opcode::ROTATE_RIGHT_ACCUMULATOR:
+        value = m_accumulator;
+        setAccumulator = true;
+        break;
+    case Opcode::ROTATE_RIGHT_ZERO_PAGE:
+        destination = getZeroPageAddress(memory);
+        value = memory.read8(destination);
+        break;
+    case Opcode::ROTATE_RIGHT_ZERO_PAGE_X_INDEXED:
+        destination = getZeroPageAddressXIndexed(memory);
+        value = memory.read8(destination);
+        break;
+    case Opcode::ROTATE_RIGHT_ABSOLUTE:
+        destination = getAbsoluteAddress(memory);
+        value = memory.read8(destination);
+        break;
+    case Opcode::ROTATE_RIGHT_ABSOLUTE_X_INDEXED:
+        destination = getZeroPageAddressXIndexed(memory);
+        value = memory.read8(destination);
+        break;
+    default:
+        cout << T_ERROR << "Emulator Opcode Error - ROR Called On Invalid Opcode 0x" << hex << int(opcode) << endl;
+        exit(0);
+    }
+
+    bool carryStatus = status_getCarry();
+
+    value = shiftRightOperation(memory, value, carryStatus, setAccumulator, destination);
+
+    ostringstream verboseString;
+    verboseString << "Rotate right resulted in value to 0x" << hex << int(value) << " and set status register to 0x" << hex << int(m_statusRegister) << endl;
+    printVerbose(verboseString.str());
+}
+
 uint8_t CPU::shiftLeftOperation(Memory memory, uint8_t value, bool withCarry, bool setAccumulator, uint16_t destination)
 {
     bool carryBit = (value & 0b10000000) != 0;
@@ -1110,6 +1125,32 @@ uint8_t CPU::shiftLeftOperation(Memory memory, uint8_t value, bool withCarry, bo
     if (withCarry)
     {
         value = value | 0b00000001;
+    }
+
+    if (setAccumulator)
+    {
+        m_accumulator = value;
+    }
+    else
+    {
+        memory.write8(destination, value);
+    };
+
+    status_setZero(value != 0);
+    status_setNegative((value & 0b1000000) != 0);
+    status_setCarry(carryBit);
+
+    return value;
+}
+
+uint8_t CPU::shiftRightOperation(Memory memory, uint8_t value, bool withCarry, bool setAccumulator, uint16_t destination)
+{
+    bool carryBit = (value & 0b00000001) != 0;
+    value = value >> 1;
+
+    if (withCarry)
+    {
+        value = value | 0b10000000;
     }
 
     if (setAccumulator)
@@ -1349,6 +1390,20 @@ uint16_t CPU::getAbsoluteAddress(Memory &memory)
     uint16_t absoluteAddress = memory.read16(m_programCounter);
     m_programCounter += 2;
     return absoluteAddress;
+}
+
+uint16_t CPU::getAbsoluteAddressXIndexed(Memory &memory)
+{
+    uint16_t absoluteAddress = memory.read16(m_programCounter);
+    m_programCounter += 2;
+    return absoluteAddress + m_xIndex;
+}
+
+uint16_t CPU::getAbsoluteAddressYIndexed(Memory &memory)
+{
+    uint16_t absoluteAddress = memory.read16(m_programCounter);
+    m_programCounter += 2;
+    return absoluteAddress + m_yIndex;
 }
 
 uint8_t CPU::getAbsoluteYIndexed(Memory &memory)
