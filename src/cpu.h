@@ -42,7 +42,6 @@ private:
     bool status_getCarry();
 
     // Opcode Handlers
-    void setInterruptDisable();
     void jumpAbsolute(Memory &memory);
     void printVerbose(std::string verboseString);
     void storeAccumulatorAtAbsolute(Memory &memory);
@@ -75,6 +74,7 @@ private:
     // Combined Handlers
     void branchOnStatusRegister(Memory &memory, uint8_t opcode);
     void clearFlag(uint8_t opcode);
+    void setFlag(uint8_t opcode);
     void loadIndexX(Memory &memory, uint8_t opcode);
     void loadIndexY(Memory &memory, uint8_t opcode);
     void storeIndexY(Memory &memory, uint8_t opcode);

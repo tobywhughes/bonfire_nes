@@ -41,7 +41,9 @@ void CPU::execute(Memory &memory, unsigned long int opcodesExecuted)
     switch (opcode)
     {
     case Opcode::SET_INTERRUPT_DISABLE:
-        setInterruptDisable();
+    case Opcode::SET_DECIMAL_FLAG:
+    case Opcode::SET_CARRY_FLAG:
+        setFlag(opcode);
         break;
     case Opcode::CLEAR_INTERRUPT_DISABLE:
     case Opcode::CLEAR_DECIMAL_MODE:
@@ -227,15 +229,6 @@ void CPU::execute(Memory &memory, unsigned long int opcodesExecuted)
         exit(0);
         break;
     }
-}
-
-void CPU::setInterruptDisable()
-{
-    status_setInterrupt(true);
-
-    ostringstream verboseString;
-    verboseString << "Status Register Updated: 0b" << bitset<8>(m_statusRegister);
-    printVerbose(verboseString.str());
 }
 
 void CPU::jumpAbsolute(Memory &memory)
@@ -499,6 +492,29 @@ void CPU::clearFlag(uint8_t opcode)
         break;
     default:
         cout << T_ERROR << "Emulator Opcode Error - Clear Flag Called On Invalid Opcode 0x" << hex << int(opcode) << endl;
+        exit(0);
+    }
+
+    ostringstream verboseString;
+    verboseString << "Status Register Updated: 0b" << bitset<8>(m_statusRegister);
+    printVerbose(verboseString.str());
+}
+
+void CPU::setFlag(uint8_t opcode)
+{
+    switch (opcode)
+    {
+    case Opcode::SET_CARRY_FLAG:
+        status_setCarry(true);
+        break;
+    case Opcode::SET_DECIMAL_FLAG:
+        status_setDecimal(true);
+        break;
+    case Opcode::SET_INTERRUPT_DISABLE:
+        status_setInterrupt(true);
+        break;
+    default:
+        cout << T_ERROR << "Emulator Opcode Error - Set Flag Called On Invalid Opcode 0x" << hex << int(opcode) << endl;
         exit(0);
     }
 
@@ -851,7 +867,7 @@ void CPU::exlusiveOrMemoryWithAccumulator(Memory &memory, uint8_t opcode)
         operand = getIndirectYIndexed(memory);
         break;
     default:
-        cout << T_ERROR << "Emulator Opcode Error - ORA Called On Invalid Opcode 0x" << hex << int(opcode) << endl;
+        cout << T_ERROR << "Emulator Opcode Error - EOR Called On Invalid Opcode 0x" << hex << int(opcode) << endl;
         exit(0);
     }
 

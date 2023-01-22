@@ -12,7 +12,13 @@ void Debug::opcodeDebugOutput(uint8_t opcode, uint16_t programCounter, bool prin
     switch (opcode)
     {
     case Opcode::SET_INTERRUPT_DISABLE:
-        opcodeDebugString = "<SIE> Set Interrupt Disable";
+        opcodeDebugString = "<SEI> Set Interrupt Disable";
+        break;
+    case Opcode::SET_DECIMAL_FLAG:
+        opcodeDebugString = "<SED> Set Decimal Flag";
+        break;
+    case Opcode::SET_CARRY_FLAG:
+        opcodeDebugString = "<SEC> Set Carry Flag";
         break;
     case Opcode::CLEAR_INTERRUPT_DISABLE:
         opcodeDebugString = "<CLI> Clear Interrupt Disable";
