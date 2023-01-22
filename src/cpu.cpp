@@ -53,6 +53,9 @@ void CPU::execute(Memory &memory, unsigned long int opcodesExecuted)
     case Opcode::JUMP_ABSOLUTE:
         jumpAbsolute(memory);
         break;
+    case Opcode::JUMP_INDIRECT:
+        jumpIndirect(memory);
+        break;
     case Opcode::TRANSFER_INDEX_X_TO_STACK_POINTER:
         transferIndexXToStackPointer();
         break;
@@ -248,6 +251,18 @@ void CPU::jumpAbsolute(Memory &memory)
     printVerbose(verboseString.str());
 
     m_programCounter = absoluteAddress;
+}
+
+void CPU::jumpIndirect(Memory &memory)
+{
+    uint16_t absoluteAddress = memory.read16(m_programCounter);
+    uint16_t indirectAddress = memory.read16(absoluteAddress);
+
+    ostringstream verboseString;
+    verboseString << "Indirect Jump to {0x" << hex << int(indirectAddress) << "}";
+    printVerbose(verboseString.str());
+
+    m_programCounter = indirectAddress;
 }
 
 void CPU::storeIndexY(Memory &memory, uint8_t opcode)

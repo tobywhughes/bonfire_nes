@@ -26,6 +26,9 @@ void Debug::opcodeDebugOutput(uint8_t opcode, uint16_t programCounter, bool prin
     case Opcode::JUMP_ABSOLUTE:
         opcodeDebugString = "<JMP abs> - Jump Absolute";
         break;
+    case Opcode::JUMP_INDIRECT:
+        opcodeDebugString = "<JMP (d)> - Jump Indirect";
+        break;
     case Opcode::STORE_ACCUMULATOR_AT_ABSOLUTE:
         opcodeDebugString = "<STA abs> - Store Accumulator At Absolute Address";
         break;

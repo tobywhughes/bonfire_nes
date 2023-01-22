@@ -43,6 +43,7 @@ private:
 
     // Opcode Handlers
     void jumpAbsolute(Memory &memory);
+    void jumpIndirect(Memory &memory);
     void printVerbose(std::string verboseString);
     void transferIndexXToStackPointer();
     void transferAccumulatorToIndexX();
